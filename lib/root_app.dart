@@ -8,16 +8,25 @@ import 'package:web_admin/generated/l10n.dart';
 import 'package:web_admin/providers/app_preferences_provider.dart';
 import 'package:web_admin/providers/user_data_provider.dart';
 import 'package:web_admin/theme/themes.dart';
+import 'package:web_admin/userModel.dart';
+import 'package:web_admin/userService.dart';
 import 'package:web_admin/utils/app_focus_helper.dart';
+import 'package:web_admin/views/screens/dashboard_screen.dart';
 
 class RootApp extends StatefulWidget {
-  const RootApp({super.key});
+  RootApp({super.key});
+
 
   @override
   State<RootApp> createState() => _RootAppState();
 }
 
 class _RootAppState extends State<RootApp> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
   GoRouter? _appRouter;
 
   Future<bool>? _future;
@@ -28,6 +37,8 @@ class _RootAppState extends State<RootApp> {
 
     return true;
   }
+
+
 
   @override
   Widget build(BuildContext context) {

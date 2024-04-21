@@ -1,6 +1,10 @@
+
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:web_admin/constants/dimens.dart';
 import 'package:web_admin/generated/l10n.dart';
 import 'package:web_admin/theme/theme_extensions/app_button_theme.dart';
@@ -9,8 +13,13 @@ import 'package:web_admin/theme/theme_extensions/app_data_table_theme.dart';
 import 'package:web_admin/views/widgets/card_elements.dart';
 import 'package:web_admin/views/widgets/portal_master_layout/portal_master_layout.dart';
 
+import '../../root_app.dart';
+import '../../userModel.dart';
+import '../../userService.dart';
+
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+   DashboardScreen({super.key});
+  List<User>users=[];
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -20,11 +29,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final _dataTableHorizontalScrollController = ScrollController();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUsers();
+  }
+  getUsers(){
+
+    UserService().getUsers().then((value) {
+      widget.users = value.toList();
+      userLength.value=widget.users.length;
+    });
+
+  }
+
+  @override
   void dispose() {
     _dataTableHorizontalScrollController.dispose();
 
     super.dispose();
   }
+  var userLength=0.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +81,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   runSpacing: kDefaultPadding,
                   children: [
                     SummaryCard(
-                      title: lang.newOrders(2),
+                      title: "Profit",
                       value: '150',
                       icon: Icons.shopping_cart_rounded,
                       backgroundColor: appColorScheme.info,
@@ -65,7 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       width: summaryCardWidth,
                     ),
                     SummaryCard(
-                      title: lang.todaySales,
+                      title: "Today Bets%",
                       value: '+12%',
                       icon: Icons.ssid_chart_rounded,
                       backgroundColor: appColorScheme.success,
@@ -73,23 +98,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       iconColor: Colors.black12,
                       width: summaryCardWidth,
                     ),
-                    SummaryCard(
-                      title: lang.newUsers(2),
-                      value: '44',
-                      icon: Icons.group_add_rounded,
-                      backgroundColor: appColorScheme.warning,
-                      textColor: appColorScheme.buttonTextBlack,
-                      iconColor: Colors.black12,
-                      width: summaryCardWidth,
-                    ),
-                    SummaryCard(
-                      title: lang.pendingIssues(2),
-                      value: '0',
-                      icon: Icons.report_gmailerrorred_rounded,
-                      backgroundColor: appColorScheme.error,
-                      textColor: themeData.colorScheme.onPrimary,
-                      iconColor: Colors.black12,
-                      width: summaryCardWidth,
+                    Obx(()=>SummaryCard(
+                        title: lang.newUsers(2),
+                        value: '${userLength.value}',
+                        icon: Icons.group_add_rounded,
+                        backgroundColor: appColorScheme.warning,
+                        textColor: appColorScheme.buttonTextBlack,
+                        iconColor: Colors.black12,
+                        width: summaryCardWidth,
+                      ),
                     ),
                   ],
                 );
@@ -127,60 +144,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   cardTheme: appDataTableTheme.cardTheme,
                                   dataTableTheme: appDataTableTheme.dataTableThemeData,
                                 ),
-                                child: DataTable(
-                                  showCheckboxColumn: false,
-                                  showBottomBorder: true,
-                                  columns: const [
-                                    DataColumn(label: Text('No.'), numeric: true),
-                                    DataColumn(label: Text('Date')),
-                                    DataColumn(label: Text('Item')),
-                                    DataColumn(label: Text('Price'), numeric: true),
-                                  ],
-                                  rows: List.generate(5, (index) {
-                                    return DataRow.byIndex(
-                                      index: index,
-                                      cells: [
-                                        DataCell(Text('#${index + 1}')),
-                                        const DataCell(Text('2022-06-30')),
-                                        DataCell(Text('Item ${index + 1}')),
-                                        DataCell(Text('${Random().nextInt(10000)}')),
-                                      ],
-                                    );
-                                  }),
+                                child: Obx(()=>DataTable(
+                                    showCheckboxColumn: userLength.value==0?false:false,
+                                    showBottomBorder: true,
+                                    columns: const [
+                                      DataColumn(label: Text('No.'), numeric: true),
+                                      DataColumn(label: Text('Email')),
+                                      DataColumn(label: Text('WalletID')),
+                                      DataColumn(label: Text('BetID'), numeric: true),
+                                      DataColumn(label: Text('WBets%'), numeric: true),
+                                      DataColumn(label: Text('LBets%'), numeric: true),
+                                      DataColumn(label: Text('Action')),
+                                    ],
+                                    rows: List.generate(widget.users.length, (index) {
+                                      return DataRow.byIndex(
+                                        index: index,
+                                        cells: [
+                                          DataCell(Text('#${index + 1}')),
+                                          DataCell(Text('${widget.users[index].userEmail}')),
+                                          DataCell(Text('${widget.users[index].walletID}')),
+                                          DataCell(Text('${widget.users[index].betID}')),
+                                          DataCell(Text('${widget.users[index].winingBets}')),
+                                          DataCell(Text('${widget.users[index].losingBets}')),
+                                          DataCell(IconButton(icon: Icon(Icons.delete_forever), onPressed: () {
+                                            deleteUser(widget.users[index]);
+                                            widget.users.removeWhere((element) => element.userEmail==widget.users[index].userEmail);
+                                            userLength.value=widget.users.length;
+                                          },)),
+
+                                        ],
+                                      );
+                                    }),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         );
                       },
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: Padding(
-                      padding: const EdgeInsets.all(kDefaultPadding),
-                      child: SizedBox(
-                        height: 40.0,
-                        width: 120.0,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: themeData.extension<AppButtonTheme>()!.infoElevated,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(right: kDefaultPadding * 0.5),
-                                child: Icon(
-                                  Icons.visibility_rounded,
-                                  size: (themeData.textTheme.labelLarge!.fontSize! + 4.0),
-                                ),
-                              ),
-                              const Text('View All'),
-                            ],
-                          ),
-                        ),
-                      ),
                     ),
                   ),
                 ],
@@ -191,6 +192,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+}
+deleteUser(User user){
+  UserService().deleteUser(user);
+
 }
 
 class SummaryCard extends StatelessWidget {

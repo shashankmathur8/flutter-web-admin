@@ -9,5 +9,5 @@ void main() async {
     apiBaseUrl: 'https://example.com',
   );
 
-  runApp(const RootApp());
+  runApp( RootApp());
 }

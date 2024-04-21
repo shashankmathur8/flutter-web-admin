@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -9,6 +11,8 @@ import 'package:web_admin/constants/dimens.dart';
 import 'package:web_admin/generated/l10n.dart';
 import 'package:web_admin/providers/user_data_provider.dart';
 import 'package:web_admin/theme/theme_extensions/app_button_theme.dart';
+import 'package:web_admin/userModel.dart';
+import 'package:web_admin/userService.dart';
 import 'package:web_admin/utils/app_focus_helper.dart';
 import 'package:web_admin/views/widgets/public_master_layout/public_master_layout.dart';
 
@@ -21,6 +25,9 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordTextEditingController = TextEditingController();
+  final emailController = TextEditingController();
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormBuilderState>();
   final _formData = FormData();
 
@@ -137,6 +144,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             padding: const EdgeInsets.only(bottom: kDefaultPadding * 1.5),
                             child: FormBuilderTextField(
                               name: 'username',
+                              controller: usernameController,
                               decoration: InputDecoration(
                                 labelText: lang.username,
                                 hintText: lang.username,
@@ -153,6 +161,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             padding: const EdgeInsets.only(bottom: kDefaultPadding * 1.5),
                             child: FormBuilderTextField(
                               name: 'email',
+                              controller: emailController,
                               decoration: InputDecoration(
                                 labelText: lang.email,
                                 hintText: lang.email,
@@ -219,11 +228,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: themeData.extension<AppButtonTheme>()!.primaryElevated,
                                 onPressed: (_isFormLoading
                                     ? null
-                                    : () => _doRegisterAsync(
-                                          userDataProvider: context.read<UserDataProvider>(),
-                                          onSuccess: (message) => _onRegisterSuccess(context, message),
-                                          onError: (message) => _onRegisterError(context, message),
-                                        )),
+                                    : () =>
+                                {
+                                  UserService().createUser(User(losingBets: "0", betID: "bet${DateTime.now().millisecondsSinceEpoch}", country: "India", isDarkMOdeSelected: false, isPrimeUSer: false, name: usernameController.text, state: "", userEmail: emailController.text, userID: "U${DateTime.now().millisecondsSinceEpoch}", walletID: "W${DateTime.now().millisecondsSinceEpoch}", winingBets: "0"))
+
+                                }),
                                 child: Text(lang.register),
                               ),
                             ),
@@ -233,8 +242,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             width: double.infinity,
                             child: OutlinedButton(
                               style: themeData.extension<AppButtonTheme>()!.secondaryOutlined,
-                              onPressed: () => GoRouter.of(context).go(RouteUri.login),
-                              child: Text(lang.backToLogin),
+                              onPressed: () => GoRouter.of(context).go(RouteUri.dashboard),
+                              child: Text("Back to Dashboard"),
                             ),
                           ),
                         ],

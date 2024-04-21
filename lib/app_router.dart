@@ -63,7 +63,7 @@ GoRouter appRouter(UserDataProvider userDataProvider) {
         path: RouteUri.dashboard,
         pageBuilder: (context, state) => NoTransitionPage<void>(
           key: state.pageKey,
-          child: const DashboardScreen(),
+          child:  DashboardScreen(),
         ),
       ),
       GoRoute(
