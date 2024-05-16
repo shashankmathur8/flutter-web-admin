@@ -1,77 +1,86 @@
 class User {
   String? id;
-
-  String? losingBets;
-
-  String? betID;
-
-  String? country;
-
-  bool? isDarkMOdeSelected;
-
-  bool? isPrimeUSer;
-
+  String? username;
   String? name;
-
-  String? state;
-
-  String? userEmail;
-
-  String? userID;
-
-  String? walletID;
-
-  String? winingBets;
-
   String? password;
+  String? email;
+  String? companyID;
+  String? phoneNo;
+  String? fax;
+  List? accessLevel;
+  String? city;
+  String? state;
+  String? country;
+  double? rating;
+  double? activity;
+  bool? isEnabled;
+  String? profile;
+  bool? isAdmin;
 
   User({
     this.id,
-    required this.losingBets,
-    required this.betID,
-    required this.country,
-    required this.isDarkMOdeSelected,
-    required this.isPrimeUSer,
-    required this.name,
-    required this.state,
-    required this.userEmail,
-    required this.userID,
-    required this.walletID,
-    required this.winingBets,
-    this.password
+    this.username,
+    this.name,
+    this.password,
+    this.email,
+    this.companyID,
+    this.phoneNo,
+    this.fax,
+    this.accessLevel,
+    this.city,
+    this.state,
+    this.country,
+    this.rating,
+    this.activity,
+    this.isEnabled,
+    this.profile,
+    this.isAdmin,
   });
 
   Map<dynamic, dynamic> toJson() {
     return {
-      "losingBets": losingBets,
-      "betID": betID,
-      "country": country,
-      "isDarkMOdeSelected": isDarkMOdeSelected,
-      "isPrimeUSer": isPrimeUSer,
+      "id": id,
+      "username": username,
       "name": name,
+      "password": password,
+      "email": email,
+      "companyID": companyID,
+      "phoneNo": phoneNo,
+      "fax": fax,
+      "accessLevel": accessLevel,
+      "city": city,
       "state": state,
-      "userEmail": userEmail,
-      "userID": userID,
-      "walletID": walletID,
-      "winingBets": winingBets,
+      "country": country,
+      "rating": rating,
+      "activity": activity,
+      "isEnabled": isEnabled,
+      "profile": profile,
+      "isAdmin": isAdmin,
+
     };
   }
 
   factory User.fromJson(Map<dynamic, dynamic> json) {
     return User(
       id: json['_id'],
-      winingBets: json['winingBets'],
-      walletID: json['walletID'],
-      userID: json['userID'],
-      userEmail: json['userEmail'],
-      state: json['state'],
+      username: json['username'],
       name: json['name'],
-      isPrimeUSer: json['isPrimeUSer'],
-      isDarkMOdeSelected: json['isDarkMOdeSelected'],
+      password: json['password'],
+      email: json['email'],
+      companyID: json['companyID'],
+      phoneNo: json['phoneNo'],
+      fax: json['fax'],
+      accessLevel: json['accessLevel'],
+      city: json['city'],
+      state: json['state'],
       country: json['country'],
-      betID: json['betID'],
-      losingBets: json['losingBets'],
-      password: json['password']
+      rating: json['rating'],
+      activity: json['activity'],
+      isEnabled: json['isEnabled'],
+      profile: json['profile'],
+      isAdmin: json['isAdmin'],
+
+
     );
   }
 }

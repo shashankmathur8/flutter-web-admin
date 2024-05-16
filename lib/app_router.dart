@@ -13,6 +13,7 @@ import 'package:web_admin/views/screens/iframe_demo_screen.dart';
 import 'package:web_admin/views/screens/login_screen.dart';
 import 'package:web_admin/views/screens/logout_screen.dart';
 import 'package:web_admin/views/screens/my_profile_screen.dart';
+import 'package:web_admin/views/screens/register_company_screen.dart';
 import 'package:web_admin/views/screens/register_screen.dart';
 import 'package:web_admin/views/screens/text_screen.dart';
 
@@ -30,6 +31,7 @@ class RouteUri {
   static const String error404 = '/404';
   static const String login = '/login';
   static const String register = '/register';
+  static const String registerCompany = '/registerCompany';
   static const String crud = '/crud';
   static const String crudDetail = '/crud-detail';
   static const String iframe = '/iframe';
@@ -39,7 +41,8 @@ const List<String> unrestrictedRoutes = [
   RouteUri.error404,
   RouteUri.logout,
   RouteUri.login, // Remove this line for actual authentication flow.
-  RouteUri.register, // Remove this line for actual authentication flow.
+  RouteUri.register,
+  RouteUri.registerCompany, // Remove this line for actual authentication flow.
 ];
 
 const List<String> publicRoutes = [
@@ -134,7 +137,16 @@ GoRouter appRouter(UserDataProvider userDataProvider) {
         pageBuilder: (context, state) {
           return NoTransitionPage<void>(
             key: state.pageKey,
-            child: const RegisterScreen(),
+            child:  RegisterScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: RouteUri.registerCompany,
+        pageBuilder: (context, state) {
+          return NoTransitionPage<void>(
+            key: state.pageKey,
+            child: const RegisterCompanyScreen(),
           );
         },
       ),

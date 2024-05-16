@@ -4,10 +4,10 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:web_admin/app_router.dart';
+import 'package:web_admin/companyService.dart';
 import 'package:web_admin/constants/dimens.dart';
 import 'package:web_admin/generated/l10n.dart';
 import 'package:web_admin/providers/user_data_provider.dart';
@@ -18,19 +18,15 @@ import 'package:web_admin/utils/app_focus_helper.dart';
 import 'package:web_admin/views/widgets/public_master_layout/public_master_layout.dart';
 
 import '../../companyModel.dart';
-import '../../companyService.dart';
 
-class RegisterScreen extends StatefulWidget {
-  List<Company>companies=[];
-
-  var companiesLength=0.obs;
-  RegisterScreen({super.key});
+class RegisterCompanyScreen extends StatefulWidget {
+  const RegisterCompanyScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<RegisterCompanyScreen> createState() => _RegisterCompanyScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterCompanyScreenState extends State<RegisterCompanyScreen> {
   final _passwordTextEditingController = TextEditingController();
   final emailController = TextEditingController();
   final usernameController = TextEditingController();
@@ -39,12 +35,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formData = FormData();
 
   var _isFormLoading = false;
-
-  @override
-  initState() {
-    print("initState Called");
-    getCompanies();
-  }
 
   Future<void> _doRegisterAsync({
     required UserDataProvider userDataProvider,
@@ -108,30 +98,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     super.dispose();
   }
-  getCompanies() async{
-    await  CompanyService().fetchAllCompany().then((value) {
-      widget.companies = value.toList();
-    });
-    if(widget.companies.isNotEmpty){
-      dropdownvalue=widget.companies.first.name.toString();
-    }
-    items.clear();
-    for(Company company in widget.companies){
-      items.add(company.name.toString());
-    }
-    widget.companiesLength.value=widget.companies.length;
-
-  }
-  String dropdownvalue = 'Item 1';
-
-  // List of items in our dropdown menu
-  var items = [
-    'Item 1',
-    'Item 2',
-    'Item 3',
-    'Item 4',
-    'Item 5',
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -180,12 +146,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Padding(
                             padding: const EdgeInsets.only(bottom: kDefaultPadding * 1.5),
                             child: FormBuilderTextField(
-                              name: 'username',
+                              name: 'Company Name',
                               controller: usernameController,
                               decoration: InputDecoration(
-                                labelText: lang.username,
-                                hintText: lang.username,
-                                helperText: '* To test registration fail: admin',
+                                labelText: 'Company Name',
+                                hintText: 'Company Name',
+                                helperText: '',
                                 border: const OutlineInputBorder(),
                                 floatingLabelBehavior: FloatingLabelBehavior.always,
                               ),
@@ -211,80 +177,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(bottom: kDefaultPadding * 1.5),
-                            child: FormBuilderTextField(
-                              name: 'password',
-                              decoration: InputDecoration(
-                                labelText: lang.password,
-                                hintText: lang.password,
-                                helperText: lang.passwordHelperText,
-                                border: const OutlineInputBorder(),
-                                floatingLabelBehavior: FloatingLabelBehavior.always,
-                              ),
-                              enableSuggestions: false,
-                              obscureText: true,
-                              controller: _passwordTextEditingController,
-                              validator: FormBuilderValidators.compose([
-                                FormBuilderValidators.required(),
-                                FormBuilderValidators.minLength(6),
-                                FormBuilderValidators.maxLength(18),
-                              ]),
-                              onSaved: (value) => (_formData.password = value ?? ''),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: kDefaultPadding * 2.0),
-                            child: FormBuilderTextField(
-                              name: 'retypePassword',
-                              decoration: InputDecoration(
-                                labelText: lang.retypePassword,
-                                hintText: lang.retypePassword,
-                                border: const OutlineInputBorder(),
-                                floatingLabelBehavior: FloatingLabelBehavior.always,
-                              ),
-                              enableSuggestions: false,
-                              obscureText: true,
-                              validator: FormBuilderValidators.compose([
-                                FormBuilderValidators.required(),
-                                (value) {
-                                  if (_formKey.currentState?.fields['password']?.value != value) {
-                                    return lang.passwordNotMatch;
-                                  }
-
-                                  return null;
-                                },
-                              ]),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: kDefaultPadding * 2.0),
-                            child: Obx(()=>DropdownButton(
-
-                                // Initial Value
-                                value: dropdownvalue,
-                                isExpanded: widget.companiesLength.value==0?true:true,
-
-                                // Down Arrow Icon
-                                icon: const Icon(Icons.keyboard_arrow_down),
-
-                                // Array list of items
-                                items: items.map((String items) {
-                                  return DropdownMenuItem(
-                                    value: items,
-                                    child: Text(items),
-                                  );
-                                }).toList(),
-                                // After selecting the desired option,it will
-                                // change button value to selected value
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    dropdownvalue = newValue!;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                          Padding(
                             padding: const EdgeInsets.only(bottom: kDefaultPadding),
                             child: SizedBox(
                               height: 40.0,
@@ -293,27 +185,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: themeData.extension<AppButtonTheme>()!.primaryElevated,
                                 onPressed: (_isFormLoading
                                     ? null
-                                    : ()  {
-                                  var companyID=widget.companies.where((element) => element.name=="${dropdownvalue}").first.companyID;
-                                          UserService().createUser(User(
-                                              country: "United States",
-                                              name: usernameController.text,
+                                    : () => {
+                                          CompanyService().createCompany(
+                                              Company(topPerformers: [],name: usernameController.text,
+                                                email: emailController.text,
+                                                companyID: "C${DateTime.now().millisecondsSinceEpoch}"
 
-                                              username: usernameController.text,
-                                              state: "",
-                                              email: emailController.text,
-                                            password: "123456",
-                                            isEnabled: true,
-                                            companyID: companyID,
-                                            accessLevel: [1],
-
-                                          )).then((value){
+                                          )).then((value) {
                                             if(value){
                                               GoRouter.of(context).go(RouteUri.dashboard);
                                             }else{
 
                                             }
-                                          });
+                                          })
                                         }),
                                 child: Text(lang.register),
                               ),

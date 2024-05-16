@@ -3,62 +3,93 @@ import 'package:dio/dio.dart';
 import 'package:web_admin/userModel.dart';
 
 
+
 class UserService {
   final dio = Dio();
-  final String _dataSource = "Bettrillion";
-  final String _database = "bettrillion";
-  final String _collection = "userMapping";
   final String _endpoint = "https://ap-south-1.aws.data.mongodb-api.com/app/data-ehiqk/endpoint/data/v1";
-  static const _apiKey = "iYAP9lLJI4nTfzugswcGJWjb8MzQbp954mFxSskYIuYSafyPcgPEqOM228iE20yJ";
   var headers = {
     "content-type": "application/json",
-    "Access-Control-Request-Headers":"*",
-    "apiKey": _apiKey,
   };
 
 
-  Future<List<User>> getUsers() async {
+  Future<bool> checkUserPassword(String userEmail, String password) async {
     var response = await dio.post(
-      "$_endpoint/action/find",
+      "$_endpoint/userLogin",
       options: Options(headers: headers),
       data: jsonEncode(
-        {
-          "dataSource": _dataSource,
-          "database": _database,
-          "collection": _collection,
-          "filter": {},
-        },
+        {"username": "${userEmail}", "password": "${password}"},
       ),
     );
     if (response.statusCode == 200) {
       var respList = response.data['documents'] as List;
       var userList = respList.map((json) => User.fromJson(json)).toList();
-      return userList;
+      if (userList.length > 0) {
+        return true;
+      } else {
+        return false;
+      }
     } else {
-      throw Exception('Error getting Users');
+      throw Exception('Error Username or Password Incorect');
     }
   }
 
-
-  Future<List<User>> getUser(String userEmail) async {
+  Future<User> fetchUser(String userEmail, String password) async {
     var response = await dio.post(
-      "$_endpoint/action/find",
+      "$_endpoint/userFetch",
       options: Options(headers: headers),
       data: jsonEncode(
-        {
-          "dataSource": _dataSource,
-          "database": _database,
-          "collection": _collection,
-          "filter": {"userEmail":"${userEmail}"},
-        },
+        {"username": "${userEmail}", "password": "${password}"},
       ),
     );
     if (response.statusCode == 200) {
       var respList = response.data['documents'] as List;
       var userList = respList.map((json) => User.fromJson(json)).toList();
-      return userList;
+      if (userList.length > 0) {
+        return userList.first;
+      }
+      return User(username: "Null");
     } else {
-      throw Exception('Error getting Bets');
+      print("'Error Username or Password Incorect' ${response.statusCode}");
+      throw Exception('Error Username or Password Incorect');
+    }
+  }
+  Future<User> fetchCurrentUser(String userEmail) async {
+    var response = await dio.post(
+      "$_endpoint/fetchCurrentUser",
+      options: Options(headers: headers),
+      data: jsonEncode(
+        {"username": "${userEmail}"},
+      ),
+    );
+    if (response.statusCode == 200) {
+      var respList = response.data['documents'] as List;
+      var userList = respList.map((json) => User.fromJson(json)).toList();
+      if (userList.length > 0) {
+        return userList.first;
+      }
+      return User(username: "Null");
+    } else {
+      throw Exception('Error Username or Password Incorect');
+    }
+  }
+
+  Future<List<User>> fetchAllUser() async {
+    var response = await dio.post(
+      "$_endpoint/fetchAllUsers",
+      options: Options(headers: headers),
+      data: jsonEncode(
+        {},
+      ),
+    );
+    if (response.statusCode == 200) {
+      var respList = response.data['documents'] as List;
+      var userList = respList.map((json) => User.fromJson(json)).toList();
+
+
+      return userList;
+
+    } else {
+      throw Exception('Error fetching Userst');
     }
   }
 
@@ -79,38 +110,26 @@ class UserService {
     }
   }
 
-  Future createUser(User user) async {
+  Future<bool> createUser(User user) async {
     var response = await dio.post(
-      "$_endpoint/action/insertOne",
+      "$_endpoint/addUser",
       options: Options(headers: headers),
-      data: jsonEncode(
-        {
-          "dataSource": _dataSource,
-          "database": _database,
-          "collection": _collection,
-          "document": user.toJson()
-        },
-      ),
+      data: user.toJson(),
     );
     if (response.statusCode == 201) {
-      return response.data;
+      return true;
     } else {
-      throw Exception('Error creating bet');
+      throw Exception('Error adding customer Customer ${response.statusCode}');
     }
   }
 
   Future deleteUser(User user) async {
     var response = await dio.post(
-      "$_endpoint/action/deleteOne",
+      "$_endpoint/deleteUser",
       options: Options(headers: headers),
       data: jsonEncode(
         {
-          "dataSource": _dataSource,
-          "database": _database,
-          "collection": _collection,
-          "filter": {
-            "userEmail": "${user.userEmail}"
-          }
+            "userEmail": "${user.username}"
         },
       ),
     );

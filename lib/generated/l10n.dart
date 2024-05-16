@@ -770,6 +770,16 @@ class Lang {
     );
   }
 
+  /// `selectCompany`
+  String get selectCompany {
+    return Intl.message(
+      'select Company',
+      name: 'selectCompany',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Save`
   String get save {
     return Intl.message(

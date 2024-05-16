@@ -11,43 +11,6 @@ final sidebarMenuConfigs = [
     title: (context) => Lang.of(context).dashboard,
   ),
   SidebarMenuConfig(
-    uri: RouteUri.form,
-    icon: Icons.edit_note_rounded,
-    title: (context) => Lang.of(context).forms(1),
-  ),
-  SidebarMenuConfig(
-    uri: '',
-    icon: Icons.interests_rounded,
-    title: (context) => Lang.of(context).uiElements(2),
-    children: [
-      SidebarChildMenuConfig(
-        uri: RouteUri.generalUi,
-        icon: Icons.circle_outlined,
-        title: (context) => Lang.of(context).generalUi,
-      ),
-      SidebarChildMenuConfig(
-        uri: RouteUri.colors,
-        icon: Icons.circle_outlined,
-        title: (context) => Lang.of(context).colors(2),
-      ),
-      SidebarChildMenuConfig(
-        uri: RouteUri.text,
-        icon: Icons.circle_outlined,
-        title: (context) => Lang.of(context).text,
-      ),
-      SidebarChildMenuConfig(
-        uri: RouteUri.buttons,
-        icon: Icons.circle_outlined,
-        title: (context) => Lang.of(context).buttons(2),
-      ),
-      SidebarChildMenuConfig(
-        uri: RouteUri.dialogs,
-        icon: Icons.circle_outlined,
-        title: (context) => Lang.of(context).dialogs(2),
-      ),
-    ],
-  ),
-  SidebarMenuConfig(
     uri: '',
     icon: Icons.library_books_rounded,
     title: (context) => Lang.of(context).pages(2),
@@ -55,12 +18,12 @@ final sidebarMenuConfigs = [
       SidebarChildMenuConfig(
         uri: RouteUri.error404,
         icon: Icons.circle_outlined,
-        title: (context) => Lang.of(context).error404,
+        title: (context) => "Reports",
       ),
       SidebarChildMenuConfig(
         uri: RouteUri.login,
         icon: Icons.circle_outlined,
-        title: (context) => Lang.of(context).login,
+        title: (context) => "Fax",
       ),
       SidebarChildMenuConfig(
         uri: RouteUri.register,
@@ -68,16 +31,11 @@ final sidebarMenuConfigs = [
         title: (context) => Lang.of(context).register,
       ),
       SidebarChildMenuConfig(
-        uri: RouteUri.crud,
+        uri: RouteUri.registerCompany,
         icon: Icons.circle_outlined,
-        title: (context) => 'CRUD',
+        title: (context) => "Register Company",
       ),
     ],
-  ),
-  SidebarMenuConfig(
-    uri: RouteUri.iframe,
-    icon: Icons.laptop_windows_rounded,
-    title: (context) => Lang.of(context).iframeDemo,
   ),
 ];
 

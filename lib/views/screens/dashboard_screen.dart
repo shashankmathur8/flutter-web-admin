@@ -3,8 +3,11 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:web_admin/companyModel.dart';
+import 'package:web_admin/companyService.dart';
 import 'package:web_admin/constants/dimens.dart';
 import 'package:web_admin/generated/l10n.dart';
 import 'package:web_admin/theme/theme_extensions/app_button_theme.dart';
@@ -17,31 +20,62 @@ import '../../root_app.dart';
 import '../../userModel.dart';
 import '../../userService.dart';
 
+
 class DashboardScreen extends StatefulWidget {
    DashboardScreen({super.key});
   List<User>users=[];
+   List<Company>companies=[];
+
+   var companiesLength=0.obs;
+   var userLength=0.obs;
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  State<DashboardScreen> createState() => DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class DashboardScreenState extends State<DashboardScreen> {
   final _dataTableHorizontalScrollController = ScrollController();
+  final _dataTableHorizontalScrollController2 = ScrollController();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getUsers();
+    getCompanies();
+  }
+
+  getCompanies(){
+    CompanyService().fetchAllCompany().then((value) {
+      widget.companies = value.toList();
+      widget.companiesLength.value=widget.companies.length;
+    });
   }
   getUsers(){
 
-    UserService().getUsers().then((value) {
+    UserService().fetchAllUser().then((value) {
       widget.users = value.toList();
-      userLength.value=widget.users.length;
+      widget.userLength.value=widget.users.length;
     });
 
   }
+  String dropdownvalue = 'Item 1';
+  String dropDownValueUsersFilter= 'username';
+  String dropDownValueCompanyFilter= 'username';
+  TextEditingController textEditingControlllerUsersSearch=TextEditingController();
+  TextEditingController textEditingControlllerCompanySearch=TextEditingController();
+
+  // List of items in our dropdown menu
+  var items = [
+    const DropdownMenuItem(value: "username",
+      child: Text("UserName"),),
+    const DropdownMenuItem(value: "email",
+      child: Text("Email"),),
+    const DropdownMenuItem(value: "companyID",
+      child: Text("Company ID"),),
+  ];
+  List<User> swapList=[];
+  List<Company> swapList2=[];
 
   @override
   void dispose() {
@@ -49,7 +83,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     super.dispose();
   }
-  var userLength=0.obs;
+
 
   @override
   Widget build(BuildContext context) {
@@ -80,33 +114,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   spacing: kDefaultPadding,
                   runSpacing: kDefaultPadding,
                   children: [
-                    SummaryCard(
-                      title: "Profit",
-                      value: '150',
-                      icon: Icons.shopping_cart_rounded,
-                      backgroundColor: appColorScheme.info,
-                      textColor: themeData.colorScheme.onPrimary,
-                      iconColor: Colors.black12,
-                      width: summaryCardWidth,
-                    ),
-                    SummaryCard(
-                      title: "Today Bets%",
-                      value: '+12%',
-                      icon: Icons.ssid_chart_rounded,
-                      backgroundColor: appColorScheme.success,
-                      textColor: themeData.colorScheme.onPrimary,
-                      iconColor: Colors.black12,
-                      width: summaryCardWidth,
-                    ),
                     Obx(()=>SummaryCard(
                         title: lang.newUsers(2),
-                        value: '${userLength.value}',
+                        value: '${widget.userLength.value}',
                         icon: Icons.group_add_rounded,
                         backgroundColor: appColorScheme.warning,
                         textColor: appColorScheme.buttonTextBlack,
                         iconColor: Colors.black12,
                         width: summaryCardWidth,
                       ),
+                    ),
+                    Obx(()=>SummaryCard(
+                      title: "Companies",
+                      value: '${widget.companiesLength.value}',
+                      icon: Icons.group_add_rounded,
+                      backgroundColor: appColorScheme.warning,
+                      textColor: appColorScheme.buttonTextBlack,
+                      iconColor: Colors.black12,
+                      width: summaryCardWidth,
+                    ),
                     ),
                   ],
                 );
@@ -123,7 +149,72 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   CardHeader(
                     title: lang.recentOrders(2),
                     showDivider: false,
+                  ),Container(
+                    child: Row(
+                      children: [
+                        SizedBox(width: 200,
+                          child: TextFormField(
+                            controller: textEditingControlllerUsersSearch,
+                          ),
+                        ),
+                        DropdownButton(items: items, value: dropDownValueUsersFilter,onChanged: (value){
+                          setState(() {
+                            dropDownValueUsersFilter = value!;
+                          });
+
+                        }),
+                        GestureDetector(
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            color: Colors.red,
+                            child: Center(child:Text("Search")),
+                          ),
+                          onTap: (){
+                            if(dropDownValueUsersFilter=="username"){
+                              swapList=widget.users;
+                              widget.users = widget.users.where((element) => element.username == textEditingControlllerUsersSearch.text).toList();
+                              widget.userLength.value = widget.users.length;
+
+                            }else if(dropDownValueUsersFilter=="email"){
+                              swapList=widget.users;
+                              widget.users = widget.users.where((element) => element.email == textEditingControlllerUsersSearch.text).toList();
+                              widget.userLength.value = widget.users.length;
+
+                            }else if(dropDownValueUsersFilter=="companyID"){
+                              swapList=widget.users;
+                              widget.users = widget.users.where((element) => element.companyID == textEditingControlllerUsersSearch.text).toList();
+                              widget.userLength.value = widget.users.length;
+
+                            }
+
+                          },
+                        ),
+                        GestureDetector(
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            color: Colors.red,
+                            child: Center(child:Text("Clear")),
+                          ),
+                          onTap: (){
+                            textEditingControlllerUsersSearch.text = "";
+                            widget.users = swapList;
+                            widget.userLength.value=swapList.length;
+
+
+
+                          },
+                        )
+
+                      ],
+                    ),
                   ),
+
+
+
+                  /*filterUI(DashboardScreenState,widget,swapList,items,dropDownValueUsersFilter,textEditingControlllerUsersSearch,widget.userLength,"user"),
+                  */
                   SizedBox(
                     width: double.infinity,
                     child: LayoutBuilder(
@@ -145,15 +236,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   dataTableTheme: appDataTableTheme.dataTableThemeData,
                                 ),
                                 child: Obx(()=>DataTable(
-                                    showCheckboxColumn: userLength.value==0?false:false,
+                                    showCheckboxColumn: widget.userLength.value==0?false:false,
                                     showBottomBorder: true,
                                     columns: const [
                                       DataColumn(label: Text('No.'), numeric: true),
+                                      DataColumn(label: Text('Username')),
                                       DataColumn(label: Text('Email')),
-                                      DataColumn(label: Text('WalletID')),
-                                      DataColumn(label: Text('BetID'), numeric: true),
-                                      DataColumn(label: Text('WBets%'), numeric: true),
-                                      DataColumn(label: Text('LBets%'), numeric: true),
+                                      DataColumn(label: Text('NAme'), numeric: true),
+                                      DataColumn(label: Text("Company"), numeric: true),
+                                      DataColumn(label: Text('isEnable'), numeric: true),
                                       DataColumn(label: Text('Action')),
                                     ],
                                     rows: List.generate(widget.users.length, (index) {
@@ -161,21 +252,159 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         index: index,
                                         cells: [
                                           DataCell(Text('#${index + 1}')),
-                                          DataCell(Text('${widget.users[index].userEmail}')),
-                                          DataCell(Text('${widget.users[index].walletID}')),
-                                          DataCell(Text('${widget.users[index].betID}')),
-                                          DataCell(Text('${widget.users[index].winingBets}')),
-                                          DataCell(Text('${widget.users[index].losingBets}')),
+                                          DataCell(Text('${widget.users[index].email}')),
+                                          DataCell(Text('${widget.users[index].username}')),
+                                          DataCell(Text('${widget.users[index].email}')),
+                                          DataCell(Text('${widget.users[index].companyID}')),
+                                          DataCell(Text('${widget.users[index].isEnabled}')),
                                           DataCell(IconButton(icon: Icon(Icons.delete_forever), onPressed: () {
                                             deleteUser(widget.users[index]);
-                                            widget.users.removeWhere((element) => element.userEmail==widget.users[index].userEmail);
-                                            userLength.value=widget.users.length;
+                                            widget.users.removeWhere((element) => element.email==widget.users[index].email);
+                                            widget.userLength.value=widget.users.length;
                                           },)),
 
                                         ],
                                       );
                                     }),
                                   ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: kDefaultPadding),
+            child: Card(
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CardHeader(
+                    title: "Companies",
+                    showDivider: false,
+                  ),
+                  /*
+                  filterUI(DashboardScreenState,widget,swapList2,items,dropDownValueCompanyFilter,textEditingControlllerCompanySearch,widget.companiesLength,"company"),
+                  */
+                  Container(
+                    child: Row(
+                      children: [
+                        SizedBox(width: 200,
+                          child: TextFormField(
+                            controller: textEditingControlllerCompanySearch,
+                          ),
+                        ),
+                        DropdownButton(items: items, value: dropDownValueCompanyFilter,onChanged: (value){
+                          setState(() {
+                            dropDownValueCompanyFilter = value!;
+                          });
+
+                        }),
+                        GestureDetector(
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            color: Colors.red,
+                            child: Center(child:Text("Search")),
+                          ),
+                          onTap: (){
+                            if(dropDownValueCompanyFilter=="username"){
+                              swapList2=widget.companies;
+                              widget.companies = widget.companies.where((element) => element.name == textEditingControlllerCompanySearch.text).toList();
+                              widget.companiesLength.value = widget.companies.length;
+
+                            }else if(dropDownValueCompanyFilter=="email"){
+                              swapList2=widget.companies;
+                              widget.companies = widget.companies.where((element) => element.email == textEditingControlllerCompanySearch.text).toList();
+                              widget.companiesLength.value = widget.companies.length;
+
+                            }else if(dropDownValueCompanyFilter=="companyID"){
+                              swapList2=widget.companies;
+                              widget.companies = widget.companies.where((element) => element.companyID == textEditingControlllerCompanySearch.text).toList();
+                              widget.companiesLength.value = widget.companies.length;
+
+                            }
+
+                          },
+                        ),
+                        GestureDetector(
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            color: Colors.red,
+                            child: Center(child:Text("Clear")),
+                          ),
+                          onTap: (){
+                            textEditingControlllerCompanySearch.text = "";
+                            widget.companies = swapList2;
+                            widget.companiesLength.value=swapList2.length;
+
+
+
+                          },
+                        )
+
+                      ],
+                    ),
+                  ),
+
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final double dataTableWidth = max(kScreenWidthMd, constraints.maxWidth);
+
+                        return Scrollbar(
+                          controller: _dataTableHorizontalScrollController2,
+                          thumbVisibility: true,
+                          trackVisibility: true,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            controller: _dataTableHorizontalScrollController2,
+                            child: SizedBox(
+                              width: dataTableWidth,
+                              child: Theme(
+                                data: themeData.copyWith(
+                                  cardTheme: appDataTableTheme.cardTheme,
+                                  dataTableTheme: appDataTableTheme.dataTableThemeData,
+                                ),
+                                child: Obx(()=>DataTable(
+                                  showCheckboxColumn: widget.companiesLength.value==0?false:false,
+                                  showBottomBorder: true,
+                                  columns: const [
+
+                                    DataColumn(label: Text('Index.'), ),
+                                    DataColumn(label: Text('Name.'), ),
+                                    DataColumn(label: Text('Email')),
+                                    DataColumn(label: Text('Company ID')),
+                                    DataColumn(label: Text('Actions')),
+                                  ],
+                                  rows: List.generate(widget.companies.length, (index) {
+                                    return DataRow.byIndex(
+                                      index: index,
+                                      cells: [
+                                        DataCell(Text('#${index + 1}')),
+                                        DataCell(Text('${widget.companies[index].name}')),
+                                        DataCell(Text('${widget.companies[index].email}')),
+                                        DataCell(Text('${widget.companies[index].companyID}')),
+                                        DataCell(IconButton(icon: Icon(Icons.delete_forever), onPressed: () {
+                                          deleteCompany(widget.companies[index]);
+                                          widget.companies.removeWhere((element) => element.name==widget.companies[index].name);
+                                          widget.companiesLength.value=widget.companies.length;
+                                        },)),
+
+                                      ],
+                                    );
+                                  }),
+                                ),
                                 ),
                               ),
                             ),
@@ -195,6 +424,94 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 deleteUser(User user){
   UserService().deleteUser(user);
+
+}
+
+Widget filterUI(state,widget,swapList,dropDownItems,dropDownValue,TextEditingController textEditingController,listRefreshValue,type){
+  return Container(
+    child: Row(
+      children: [
+        SizedBox(width: 200,
+          child: TextFormField(
+              controller: textEditingController,
+          ),
+        ),
+        DropdownButton(items: dropDownItems, value: dropDownValue,onChanged: (value){
+          state.setState(() {
+            dropDownValue = value!;
+          });
+
+        }),
+        GestureDetector(
+          child: Container(
+            width: 50,
+            height: 50,
+            color: Colors.red,
+            child: Center(child:Text("Search")),
+          ),
+          onTap: (){
+            if(dropDownValue=="username"){
+              if(type=="user") {
+                swapList=widget.users;
+                widget.users = widget.users.where((element) => element.username == textEditingController.text).toList();
+                listRefreshValue.value = widget.users.length;
+              }else{
+                swapList=widget.companies;
+              widget.companies = widget.companies.where((element) => element.name == textEditingController.text).toList();
+                listRefreshValue.value = widget.companies.length;
+              }
+            }else if(dropDownValue=="email"){
+              if(type=="user") {
+                swapList=widget.users;
+                widget.users = widget.users.where((element) => element.email == textEditingController.text).toList();
+                listRefreshValue.value = widget.users.length;
+              }else{
+                swapList=widget.companies;
+                widget.companies = widget.companies.where((element) => element.email == textEditingController.text).toList();
+                listRefreshValue.value = widget.companies.length;
+              }
+            }else if(dropDownValue=="companyID"){
+              if(type=="user") {
+                swapList=widget.users;
+                widget.users = widget.users.where((element) => element.companyID == textEditingController.text).toList();
+                listRefreshValue.value = widget.users.length;
+              }else{
+                swapList=widget.companies;
+                widget.companies = widget.companies.where((element) => element.companyID == textEditingController.text).toList();
+                listRefreshValue.value = widget.companies.length;
+              }
+            }
+
+          },
+        ),
+        GestureDetector(
+          child: Container(
+            width: 50,
+            height: 50,
+            color: Colors.red,
+            child: Center(child:Text("Clear")),
+          ),
+          onTap: (){
+            if (type == "user") {
+              textEditingController.text = "";
+              widget.users = swapList;
+              listRefreshValue.value=swapList.length;
+            }else{
+              textEditingController.text = "";
+              widget.companies = swapList;
+              listRefreshValue.value=swapList.length;
+            }
+
+
+          },
+        )
+
+      ],
+    ),
+  );
+}
+deleteCompany(Company company){
+  CompanyService().deleteCompany(company);
 
 }
 
