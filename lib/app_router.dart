@@ -7,7 +7,6 @@ import 'package:web_admin/views/screens/crud_screen.dart';
 import 'package:web_admin/views/screens/dashboard_screen.dart';
 import 'package:web_admin/views/screens/dialogs_screen.dart';
 import 'package:web_admin/views/screens/error_screen.dart';
-import 'package:web_admin/views/screens/form_screen.dart';
 import 'package:web_admin/views/screens/general_ui_screen.dart';
 import 'package:web_admin/views/screens/iframe_demo_screen.dart';
 import 'package:web_admin/views/screens/login_screen.dart';
@@ -81,13 +80,6 @@ GoRouter appRouter(UserDataProvider userDataProvider) {
         pageBuilder: (context, state) => NoTransitionPage<void>(
           key: state.pageKey,
           child: const LogoutScreen(),
-        ),
-      ),
-      GoRoute(
-        path: RouteUri.form,
-        pageBuilder: (context, state) => NoTransitionPage<void>(
-          key: state.pageKey,
-          child: const FormScreen(),
         ),
       ),
       GoRoute(
