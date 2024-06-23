@@ -1,4 +1,9 @@
+import 'dart:convert';
+
+import 'package:aad_oauth/aad_oauth.dart';
+import 'package:aad_oauth/model/config.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -12,6 +17,9 @@ import 'package:web_admin/theme/theme_extensions/app_button_theme.dart';
 import 'package:web_admin/theme/theme_extensions/app_color_scheme.dart';
 import 'package:web_admin/utils/app_focus_helper.dart';
 import 'package:web_admin/views/widgets/public_master_layout/public_master_layout.dart';
+
+import '../../localStorage.dart';
+import '../../main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,27 +41,33 @@ class _LoginScreenState extends State<LoginScreen> {
   }) async {
     AppFocusHelper.instance.requestUnfocus();
 
-    if (_formKey.currentState?.validate() ?? false) {
+
       // Validation passed.
       _formKey.currentState!.save();
 
       setState(() => _isFormLoading = true);
 
+      // TODO add MSAL
+
       Future.delayed(const Duration(seconds: 1), () async {
-        if (_formData.username != 'admin' || _formData.password != 'admin') {
-          onError.call('Invalid username or password.');
-        } else {
+
           await userDataProvider.setUserDataAsync(
             username: 'Admin ABC',
             userProfileImageUrl: 'https://picsum.photos/id/1005/300/300',
           );
+         var x= await azureSignInApi(true,"","");
+          print(true);
+          if(x){
+            onSuccess.call();
+          }else{
+            onError.call("Error While Logging!");
+          }
 
-          onSuccess.call();
-        }
+
 
         setState(() => _isFormLoading = false);
       });
-    }
+
   }
 
   void _onLoginSuccess(BuildContext context) {
@@ -118,39 +132,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(bottom: kDefaultPadding * 1.5),
-                            child: FormBuilderTextField(
-                              name: 'username',
-                              decoration: InputDecoration(
-                                labelText: lang.username,
-                                hintText: lang.username,
-                                helperText: '* Demo username: admin',
-                                border: const OutlineInputBorder(),
-                                floatingLabelBehavior: FloatingLabelBehavior.always,
-                              ),
-                              enableSuggestions: false,
-                              validator: FormBuilderValidators.required(),
-                              onSaved: (value) => (_formData.username = value ?? ''),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: kDefaultPadding * 2.0),
-                            child: FormBuilderTextField(
-                              name: 'password',
-                              decoration: InputDecoration(
-                                labelText: lang.password,
-                                hintText: lang.password,
-                                helperText: '* Demo password: admin',
-                                border: const OutlineInputBorder(),
-                                floatingLabelBehavior: FloatingLabelBehavior.always,
-                              ),
-                              enableSuggestions: false,
-                              obscureText: true,
-                              validator: FormBuilderValidators.required(),
-                              onSaved: (value) => (_formData.password = value ?? ''),
-                            ),
-                          ),
-                          Padding(
                             padding: const EdgeInsets.only(bottom: kDefaultPadding),
                             child: SizedBox(
                               height: 40.0,
@@ -204,6 +185,93 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+
+  late AadOAuth oauth;
+
+
+
+
+  final Config config = Config(
+    customTokenUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+    customAuthorizationUrl:"https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+    tenant: '9a475b2d-36f3-4c28-8caf-aba70242cee4',
+    clientId: '0e445bb4-1ad9-4063-8ffe-e760a00428c7',
+    scope: 'openid profile email Mail.Read Mail.Send User.ReadWrite.All Directory.ReadWrite.All',
+    navigatorKey: navigatorKey,
+    loader: SizedBox(),
+    appBar: AppBar(
+      title: Text('AAD OAuth Demo'),
+    ),
+    onPageFinished: (String url) {
+      print('onPageFinished: $url');
+    },
+  );
+
+
+  Future<bool> azureSignInApi(bool redirect,String email,String password) async {
+
+
+    print("object");
+    oauth = AadOAuth(config);
+    return login(oauth,email,password);
+
+  }
+  logout(){
+    oauth = AadOAuth(config);
+    oauth.logout();
+  }
+
+  Future<bool> login(oauth, String email, String password) async {
+    final result = await oauth.login(refreshIfAvailable:true);
+    result.fold(
+          (l) => print(l.toString()),
+          (r) => print(''),
+    );
+    var accessToken = await oauth.getAccessToken();
+    if (accessToken != null) {
+      mainAccessToken=accessToken;
+      print(accessToken);
+      LocalStorageHelper().saveString("accessToken", accessToken);
+      return fetchAzureUserDetails();
+    }
+    else{
+      return false;
+    }
+  }
+  var mainAccessToken="";
+
+  Future<bool> fetchAzureUserDetails() async {
+    final dio = Dio();
+
+    var headers = {
+      "Authorization": "Bearer $mainAccessToken",
+    };
+    var data;
+    var response;
+    try{
+      response = await dio.get(
+        "https://graph.microsoft.com/v1.0/me",
+        options: Options(headers: headers),
+      );
+
+      data = await json.decode(response.toString());
+      print("data=${data}");
+      print("data=${data}");
+      if(data["mail"].toString()=="ShashankMathur@SMAssociates29.onmicrosoft.com" || data["mail"].toString()=="MSingh@SMAssociates29.onmicrosoft.com" ){
+        return true;
+      }else{
+        return false;
+      }
+      //fetchEmails();
+    }catch(e){
+      print(e.toString());
+      return false;
+    }
+
+
+    return true;
   }
 }
 

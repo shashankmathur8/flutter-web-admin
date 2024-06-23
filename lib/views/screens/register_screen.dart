@@ -19,6 +19,7 @@ import 'package:web_admin/views/widgets/public_master_layout/public_master_layou
 
 import '../../companyModel.dart';
 import '../../companyService.dart';
+import '../../localStorage.dart';
 
 class RegisterScreen extends StatefulWidget {
   List<Company>companies=[];
@@ -295,26 +296,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     ? null
                                     : ()  {
                                   var companyID=widget.companies.where((element) => element.name=="${dropdownvalue}").first.companyID;
-                                          UserService().createUser(User(
-                                              country: "United States",
-                                              name: usernameController.text,
-
-                                              username: usernameController.text,
-                                              state: "",
-                                              email: emailController.text,
-                                            password: "123456",
-                                            isEnabled: true,
-                                            companyID: companyID,
-                                            accessLevel: [1],
-
-                                          )).then((value){
-                                            if(value){
-                                              GoRouter.of(context).go(RouteUri.dashboard);
-                                            }else{
-
-                                            }
+                                  String mainAccessToken = LocalStorageHelper().getString("accessToken");
+                                  UserService()
+                                            .registerUser(context,mainAccessToken, usernameController.text, emailController.text)
+                                            .then((onValue) {
+                                          UserService()
+                                              .assignUpdateUsageLocation(context,
+                                                  mainAccessToken, usernameController.text, emailController.text)
+                                              .then((onValue) {
+                                            UserService()
+                                                .assignLicenseToUser(context,
+                                                    mainAccessToken, usernameController.text, emailController.text)
+                                                .then((onValue) {
+                                              //assignLicenseToUser
+                                              UserService()
+                                                  .createUser(User(
+                                                country: "United States",
+                                                name: usernameController.text,
+                                                username: usernameController.text,
+                                                state: "",
+                                                email: emailController.text,
+                                                password: "123456",
+                                                isEnabled: true,
+                                                companyID: companyID,
+                                                accessLevel: [1, 2, 3],
+                                              ))
+                                                  .then((value) {
+                                                if (value) {
+                                                  GoRouter.of(context).go(RouteUri.dashboard);
+                                                } else {}
+                                              });
+                                            });
                                           });
-                                        }),
+                                        });
+                                      }),
                                 child: Text(lang.register),
                               ),
                             ),

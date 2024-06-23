@@ -35,7 +35,7 @@ class ErrorScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(kDefaultPadding),
       children: [
-        //TODO Add report options
+        Text("Reports")
       ],
     );
   }

@@ -16,9 +16,11 @@ import 'package:web_admin/theme/theme_extensions/app_data_table_theme.dart';
 import 'package:web_admin/views/widgets/card_elements.dart';
 import 'package:web_admin/views/widgets/portal_master_layout/portal_master_layout.dart';
 
+import '../../localStorage.dart';
 import '../../root_app.dart';
 import '../../userModel.dart';
 import '../../userService.dart';
+import '../../utils/genericOverlay.dart';
 
 
 class DashboardScreen extends StatefulWidget {
@@ -76,6 +78,10 @@ class DashboardScreenState extends State<DashboardScreen> {
   ];
   List<User> swapList=[];
   List<Company> swapList2=[];
+  var valueCheckBox1=false.obs;
+  var valueCheckBox2=false.obs;
+  var valueCheckBox3=false.obs;
+
 
   @override
   void dispose() {
@@ -173,17 +179,17 @@ class DashboardScreenState extends State<DashboardScreen> {
                           onTap: (){
                             if(dropDownValueUsersFilter=="username"){
                               swapList=widget.users;
-                              widget.users = widget.users.where((element) => element.username == textEditingControlllerUsersSearch.text).toList();
+                              widget.users = widget.users.where((element) => element.username!.contains(textEditingControlllerUsersSearch.text)).toList();
                               widget.userLength.value = widget.users.length;
 
                             }else if(dropDownValueUsersFilter=="email"){
                               swapList=widget.users;
-                              widget.users = widget.users.where((element) => element.email == textEditingControlllerUsersSearch.text).toList();
+                              widget.users = widget.users.where((element) => element.email!.contains(textEditingControlllerUsersSearch.text) ).toList();
                               widget.userLength.value = widget.users.length;
 
                             }else if(dropDownValueUsersFilter=="companyID"){
                               swapList=widget.users;
-                              widget.users = widget.users.where((element) => element.companyID == textEditingControlllerUsersSearch.text).toList();
+                              widget.users = widget.users.where((element) => element.companyID!.contains(textEditingControlllerUsersSearch.text) ).toList();
                               widget.userLength.value = widget.users.length;
 
                             }
@@ -242,7 +248,6 @@ class DashboardScreenState extends State<DashboardScreen> {
                                       DataColumn(label: Text('No.'), numeric: true),
                                       DataColumn(label: Text('Username')),
                                       DataColumn(label: Text('Email')),
-                                      DataColumn(label: Text('NAme'), numeric: true),
                                       DataColumn(label: Text("Company"), numeric: true),
                                       DataColumn(label: Text('isEnable'), numeric: true),
                                       DataColumn(label: Text('Action')),
@@ -254,14 +259,91 @@ class DashboardScreenState extends State<DashboardScreen> {
                                           DataCell(Text('#${index + 1}')),
                                           DataCell(Text('${widget.users[index].email}')),
                                           DataCell(Text('${widget.users[index].username}')),
-                                          DataCell(Text('${widget.users[index].email}')),
                                           DataCell(Text('${widget.users[index].companyID}')),
                                           DataCell(Text('${widget.users[index].isEnabled}')),
-                                          DataCell(IconButton(icon: Icon(Icons.delete_forever), onPressed: () {
-                                            deleteUser(widget.users[index]);
-                                            widget.users.removeWhere((element) => element.email==widget.users[index].email);
-                                            widget.userLength.value=widget.users.length;
-                                          },)),
+                                          DataCell(Row(
+                                            children: [
+                                              IconButton(
+                                                icon: Icon(Icons.delete_forever),
+                                                onPressed: () {
+                                                  deleteUser(widget.users[index]);
+                                                  widget.users
+                                                      .removeWhere((element) => element.email == widget.users[index].email);
+                                                  widget.userLength.value = widget.users.length;
+                                                },
+                                              ),
+                                              IconButton(icon: Icon(Icons.edit), onPressed: () {
+                                                valueCheckBox1.value=widget.users[index].accessLevel!.contains("1");
+                                                valueCheckBox2.value=widget.users[index].accessLevel!.contains("2");
+                                                valueCheckBox3.value=widget.users[index].accessLevel!.contains("3");
+                                                Navigator.of(context).push(GenericOverlay(
+                                                  iconPath: 'assets/images/editPerm.png',
+                                                  title: 'Permissions',
+                                                  positiveButtonText: 'Assign',
+                                                  negativeButtonText: 'Cancel',
+                                                  messageWidget: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                    children: [
+                                                      Column(
+                                                        children: [
+                                                          Obx(()=>Checkbox(value: valueCheckBox1.value, onChanged: (value){
+                                                              setState(() {
+                                                                this.valueCheckBox1.value = value!;
+                                                              });
+                                                            }),
+                                                          ),
+                                                          Text("L1"),
+                                                        ],
+                                                      ),Column(
+                                                        children: [
+                                                          Obx(()=>Checkbox(value: valueCheckBox2.value, onChanged: (value){
+                                                              setState(() {
+                                                                this.valueCheckBox2.value = value!;
+                                                              });
+                                                            }),
+                                                          ),
+                                                          Text("L2"),
+                                                        ],
+                                                      ),
+                                                      Column(
+                                                        children: [
+                                                          Obx(()=>Checkbox(value: valueCheckBox3.value, onChanged: (value){
+                                                              setState(() {
+                                                                print("$value");
+                                                                this.valueCheckBox3.value = value!;
+                                                              });
+                                                            }),
+                                                          ),
+                                                          Text("L3"),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  ),
+                                                  onPositivePressCallback: () {
+                                                    var v1value="-";
+                                                    var v2value="-";
+                                                    var v3value="-";
+                                                    if(valueCheckBox1.value){
+                                                      v1value="1";
+                                                    }
+                                                    if(valueCheckBox2.value){
+                                                      v2value="2";
+                                                    }
+                                                    if(valueCheckBox3.value){
+                                                      v3value="3";
+                                                    }
+
+                                                    widget.users[index].accessLevel=["$v1value", "$v2value", "$v3value"];
+                                                    changeUserPermission(widget.users[index],valueCheckBox1.value,valueCheckBox2.value,valueCheckBox3.value,);
+                                                    Navigator.pop(context);
+                                                  },
+                                                  onNegativePressCallback: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                ));
+                                              },)
+                                            ],
+                                          )),
 
                                         ],
                                       );
@@ -421,6 +503,11 @@ class DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+
+
+}
+void changeUserPermission(User user,bool value, bool value2, bool value3) {
+  UserService().updateUserAccess(user,value,value2,value3);
 }
 deleteUser(User user){
   UserService().deleteUser(user);
