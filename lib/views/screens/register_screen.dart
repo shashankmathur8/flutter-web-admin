@@ -319,7 +319,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                 password: "123456",
                                                 isEnabled: true,
                                                 companyID: companyID,
-                                                accessLevel: [1, 2, 3],
+                                                accessLevel: ["1", "2", "3"],
                                               ))
                                                   .then((value) {
                                                 if (value) {
