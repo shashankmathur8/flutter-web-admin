@@ -8,6 +8,7 @@ class AppStyles{
   static const t20NWhite = TextStyle(fontSize: 20,fontWeight: FontWeight.normal,color: Colors.white);
   static const t20NBlack = TextStyle(fontSize: 20,fontWeight: FontWeight.normal,color: Colors.black87);
   static const t22BBlack = TextStyle(fontSize: 22,fontWeight: FontWeight.bold,color: Colors.black87);
+  static const t22BPrimary = TextStyle(fontSize: 22,fontWeight: FontWeight.bold,color: AppColors.colorPrimary);
   static const t14NWhite = TextStyle(fontSize: 14,fontWeight: FontWeight.normal,color: Colors.white);
 
   static const t14Blue = TextStyle(fontSize: 14,fontWeight: FontWeight.normal,color: Color.fromRGBO(34,100,229,1));

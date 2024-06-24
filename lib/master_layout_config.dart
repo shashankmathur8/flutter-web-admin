@@ -21,11 +21,6 @@ final sidebarMenuConfigs = [
         title: (context) => "Reports",
       ),
       SidebarChildMenuConfig(
-        uri: RouteUri.login,
-        icon: Icons.circle_outlined,
-        title: (context) => "Fax",
-      ),
-      SidebarChildMenuConfig(
         uri: RouteUri.register,
         icon: Icons.circle_outlined,
         title: (context) => Lang.of(context).register,
