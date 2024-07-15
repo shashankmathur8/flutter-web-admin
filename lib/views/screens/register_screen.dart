@@ -295,39 +295,68 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 onPressed: (_isFormLoading
                                     ? null
                                     : ()  {
-                                  var companyID=widget.companies.where((element) => element.name=="${dropdownvalue}").first.companyID;
+                                  var company=widget.companies.where((element) => element.name=="${dropdownvalue}").first;
+                                  var companyID=company.companyID;
+                                  List xyz=[];
+                                  xyz.addAll(company.level1Status!.toList());
+                                  xyz.addAll(company.level2Status!.toList());
+                                  xyz.addAll(company.level3Status!.toList());
                                   String mainAccessToken = LocalStorageHelper().getString("accessToken");
                                   UserService()
                                             .registerUser(context,mainAccessToken, usernameController.text, emailController.text)
                                             .then((onValue) {
-                                          UserService()
-                                              .assignUpdateUsageLocation(context,
-                                                  mainAccessToken, usernameController.text, emailController.text)
-                                              .then((onValue) {
+                                          if(onValue){
                                             UserService()
-                                                .assignLicenseToUser(context,
-                                                    mainAccessToken, usernameController.text, emailController.text)
+                                                .assignUpdateUsageLocation(context,
+                                                mainAccessToken, usernameController.text, emailController.text)
                                                 .then((onValue) {
-                                              //assignLicenseToUser
-                                              UserService()
-                                                  .createUser(User(
-                                                country: "United States",
-                                                name: usernameController.text,
-                                                username: usernameController.text,
-                                                state: "",
-                                                email: emailController.text,
-                                                password: "123456",
-                                                isEnabled: true,
-                                                companyID: companyID,
-                                                accessLevel: ["1", "2", "3"],
-                                              ))
-                                                  .then((value) {
-                                                if (value) {
-                                                  GoRouter.of(context).go(RouteUri.dashboard);
-                                                } else {}
-                                              });
+                                              if(onValue){
+                                                UserService()
+                                                    .assignLicenseToUser(context,
+                                                    mainAccessToken, usernameController.text, emailController.text)
+                                                    .then((onValue) {
+                                                  //assignLicenseToUser
+                                                  if(onValue){
+                                                    UserService()
+                                                        .createUser(User(
+                                                      country: "United States",
+                                                      name: usernameController.text,
+                                                      username: usernameController.text,
+                                                      state: "",
+                                                      email: emailController.text,
+                                                      password: "123456",
+                                                      isEnabled: true,
+                                                      companyID: companyID,
+                                                      accessLevel: "1",
+                                                    ),xyz)
+                                                        .then((value) {
+                                                      if (value) {
+                                                        GoRouter.of(context).go(RouteUri.dashboard);
+                                                      } else {}
+                                                    });
+                                                  }else{
+                                                    var snackBar = SnackBar(
+                                                      content: Text('Error Creating User'),
+                                                    );
+                                                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                                    //Navigator.pop(context);
+                                                  }
+                                                });
+                                              } else {
+                                                var snackBar = SnackBar(
+                                                  content: Text('Error Creating User'),
+                                                );
+                                                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                               // Navigator.pop(context);
+                                              }
                                             });
-                                          });
+                                          }else {
+                                            var snackBar = SnackBar(
+                                              content: Text('Error Creating User'),
+                                            );
+                                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                           // Navigator.pop(context);
+                                          }
                                         });
                                       }),
                                 child: Text(lang.register),

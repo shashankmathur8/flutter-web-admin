@@ -7,7 +7,8 @@ class User {
   String? companyID;
   String? phoneNo;
   String? fax;
-  List? accessLevel;
+  String? accessLevel;
+  List? notif;
   String? city;
   String? state;
   String? country;
@@ -16,6 +17,11 @@ class User {
   bool? isEnabled;
   String? profile;
   bool? isAdmin;
+  List?level3Access;
+
+  bool? isLevel1Enabled;
+  bool? isLevel2Enabled;
+  bool? isLevel3Enabled;
 
   User({
     this.id,
@@ -35,6 +41,11 @@ class User {
     this.isEnabled,
     this.profile,
     this.isAdmin,
+    this.notif,
+    this.level3Access,
+    this.isLevel1Enabled,
+    this.isLevel2Enabled,
+    this.isLevel3Enabled
   });
 
   Map<dynamic, dynamic> toJson() {
@@ -56,31 +67,37 @@ class User {
       "isEnabled": isEnabled,
       "profile": profile,
       "isAdmin": isAdmin,
-
+      "notif":notif,
+      "level3Access":level3Access,
+      "isLevel1Enabled":isLevel1Enabled,
+      "isLevel2Enabled":isLevel2Enabled,
+      "isLevel3Enabled":isLevel3Enabled,
     };
   }
 
   factory User.fromJson(Map<dynamic, dynamic> json) {
     return User(
-      id: json['_id'],
-      username: json['username'],
-      name: json['name'],
-      password: json['password'],
-      email: json['email'],
-      companyID: json['companyID'],
-      phoneNo: json['phoneNo'],
-      fax: json['fax'],
-      accessLevel: json['accessLevel'],
-      city: json['city'],
-      state: json['state'],
-      country: json['country'],
-      rating: json['rating'],
-      activity: json['activity'],
-      isEnabled: json['isEnabled'],
-      profile: json['profile'],
-      isAdmin: json['isAdmin'],
-
-
-    );
+        id: json['_id'],
+        username: json['username'],
+        name: json['name'],
+        password: json['password'],
+        email: json['email'],
+        companyID: json['companyID'],
+        phoneNo: json['phoneNo'],
+        fax: json['fax'],
+        accessLevel: json['accessLevel'],
+        city: json['city'],
+        state: json['state'],
+        country: json['country'],
+        rating: json['rating'],
+        activity: json['activity'],
+        isEnabled: json['isEnabled'],
+        profile: json['profile'],
+        isAdmin: json['isAdmin'],
+        notif: json['notif'],
+        level3Access: json['level3Access'],
+        isLevel1Enabled:json["isLevel1Enabled"]??false,
+        isLevel2Enabled:json["isLevel2Enabled"]??false,
+        isLevel3Enabled:json["isLevel3Enabled"]??false,);
   }
 }

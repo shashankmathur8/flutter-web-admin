@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Future.delayed(const Duration(seconds: 1), () async {
 
           await userDataProvider.setUserDataAsync(
-            username: 'Admin ABC',
+            username: 'Admin',
             userProfileImageUrl: 'https://picsum.photos/id/1005/300/300',
           );
          var x= await azureSignInApi(true,"","");
@@ -221,6 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
   logout(){
     oauth = AadOAuth(config);
     oauth.logout();
+
   }
 
   Future<bool> login(oauth, String email, String password) async {

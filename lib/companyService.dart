@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:get/get.dart';
 
 import 'companyModel.dart';
 
@@ -32,14 +33,15 @@ class CompanyService {
 
 
   Future<bool> createCompany(Company company) async {
-    var response = await dio.post(
-      "$_endpoint/addCompany",
-      options: Options(headers: headers),
-      data: company.toJson()
-    );
-    if (response.statusCode == 201) {
-      return true;
-    } else {
+    try{
+      var response = await dio.post("$_endpoint/addCompany", options: Options(headers: headers), data: company.toJson());
+      if (response.statusCode == 201) {
+        return true;
+      } else {
+        return false;
+      }
+    }catch(e){
+      print(e);
       return false;
     }
   }

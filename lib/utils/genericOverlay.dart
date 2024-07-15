@@ -114,17 +114,6 @@ class GenericOverlay extends ModalRoute<void> {
 
                               )),
                               Spacer(),
-                               GestureDetector(
-                                 onTap: (){
-                                   Get.back();
-                                 },
-                                 child: Container(
-                                  width: 20,
-                                   height: 20,
-                                   child: Center(child: Text("X",style: AppStyles.t16NWhite,)),
-                                   color: Colors.red,
-                                                               ),
-                               )
                             ],
                           ),
                           Column(

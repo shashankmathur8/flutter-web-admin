@@ -1,3 +1,5 @@
+import 'package:aad_oauth/aad_oauth.dart';
+import 'package:aad_oauth/model/config.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +11,8 @@ import 'package:web_admin/providers/app_preferences_provider.dart';
 import 'package:web_admin/theme/theme_extensions/app_color_scheme.dart';
 import 'package:web_admin/theme/theme_extensions/app_sidebar_theme.dart';
 import 'package:web_admin/views/widgets/portal_master_layout/sidebar.dart';
+
+import '../../../main.dart';
 
 class LocaleMenuConfig {
   final String languageCode;
@@ -32,7 +36,7 @@ class PortalMasterLayout extends StatelessWidget {
   final FloatingActionButtonAnimator? floatingActionButtonAnimator;
   final List<Widget>? persistentFooterButtons;
 
-  const PortalMasterLayout({
+   PortalMasterLayout({
     super.key,
     required this.body,
     this.autoSelectMenu = true,
@@ -106,9 +110,35 @@ class PortalMasterLayout extends StatelessWidget {
       autoSelectMenu: autoSelectMenu,
       selectedMenuUri: selectedMenuUri,
       onAccountButtonPressed: () => goRouter.go(RouteUri.myProfile),
-      onLogoutButtonPressed: () => goRouter.go(RouteUri.logout),
+      onLogoutButtonPressed: () {
+        goRouter.go(RouteUri.logout);
+        logout(goRouter);
+      },
       sidebarConfigs: sidebarMenuConfigs,
     );
+  }
+
+  final Config config = Config(
+    customTokenUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+    customAuthorizationUrl:"https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+    tenant: '9a475b2d-36f3-4c28-8caf-aba70242cee4',
+    clientId: '0e445bb4-1ad9-4063-8ffe-e760a00428c7',
+    scope: 'openid profile email Mail.Read Mail.Send User.ReadWrite.All Directory.ReadWrite.All',
+    navigatorKey: navigatorKey,
+    loader: SizedBox(),
+    appBar: AppBar(
+      title: Text('AAD OAuth Demo'),
+    ),
+    onPageFinished: (String url) {
+      print('onPageFinished: $url');
+    },
+  );
+
+  logout(GoRouter goRouter){
+    AadOAuth oauth = AadOAuth(config);
+    oauth.logout().then((onValue){
+
+    });
   }
 
   Widget _toggleThemeButton(BuildContext context) {

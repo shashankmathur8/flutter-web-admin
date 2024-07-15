@@ -113,11 +113,13 @@ class UserService {
     }
   }
 
-  Future<bool> createUser(User user) async {
+  Future<bool> createUser(User user,List accessList) async {
+    var userModel=user.toJson();
+    userModel["level3Access"]=accessList;
     var response = await dio.post(
       "$_endpoint/addUser",
       options: Options(headers: headers),
-      data: user.toJson(),
+      data: userModel,
     );
     if (response.statusCode == 201) {
       return true;
@@ -378,20 +380,7 @@ var headers = {
     }
   }
 
-  Future updateUserAccess(User user,bool v1,bool v2,bool v3) async {
-    var v1value="-";
-    var v2value="-";
-    var v3value="-";
-    if(v1){
-      v1value="1";
-    }
-    if(v2){
-      v2value="2";
-    }
-    if(v3){
-      v3value="3";
-    }
-    print(["$v1value", "$v2value", "$v2value"]);
+  Future updateUserAccess(User user,String v1,var list) async {
     try{
       var response = await dio.post(
         "$_endpoint/updateUserPermissions",
@@ -400,7 +389,12 @@ var headers = {
           "email": "${user.email}",
           "update": {
             "\$set": {
-              "accessLevel": ["$v1value", "$v2value", "$v3value"],
+              "accessLevel": v1,
+              "level3Access":list,
+              "isLevel1Enabled":user.isLevel1Enabled,
+              "isLevel2Enabled":user.isLevel2Enabled,
+              "isLevel3Enabled":user.isLevel3Enabled,
+
             }
           }
         }),
@@ -409,6 +403,32 @@ var headers = {
         return response.data;
       } else {
         throw Exception('Error creating bet');
+      }
+    }catch(e){
+      print((e as DioException).response!.data["error"].toString());
+    }
+  }
+  Future sendUserMessage(User user,String message) async {
+    var list=user.notif;
+    list?.add(message);
+    try{
+      var response = await dio.post(
+        "$_endpoint/updateUserNotifications",
+        options: Options(headers: headers),
+        data: jsonEncode({
+          "email": "${user.email}",
+          "update": {
+            "\$set": {
+              "notif": list??["$message"],
+            }
+          }
+        }),
+      );
+      if (response.statusCode == 200) {
+        //user.notif=list;
+        return response.data;
+      } else {
+        throw Exception('Error Updating notifications');
       }
     }catch(e){
       print((e as DioException).response!.data["error"].toString());

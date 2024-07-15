@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'appColors.dart';
 enum HistoryType { edit, remove, create,access,error }
 class AppStyles{
-  static const String version="1.1.0";
+  static const String version="1.1.2 3 Jul";
   static const t20NWhite = TextStyle(fontSize: 20,fontWeight: FontWeight.normal,color: Colors.white);
   static const t20NBlack = TextStyle(fontSize: 20,fontWeight: FontWeight.normal,color: Colors.black87);
   static const t22BBlack = TextStyle(fontSize: 22,fontWeight: FontWeight.bold,color: Colors.black87);
