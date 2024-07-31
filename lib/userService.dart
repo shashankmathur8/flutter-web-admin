@@ -8,7 +8,7 @@ import 'package:web_admin/userModel.dart';
 
 class UserService {
   final dio = Dio();
-  final String _endpoint = "https://crmproxyserver.azurewebsites.net";
+  final String _endpoint = "https://hrhcserver.azurewebsites.net";
   //final String _endpoint = "http://localhost:3000/";
   var headers = {
     "content-type": "application/json",
@@ -410,7 +410,7 @@ var headers = {
   }
   Future sendUserMessage(User user,String message) async {
     var list=user.notif;
-    list?.add(message);
+    list?.add({"message": "$message", "timeStamp": DateTime.now().toIso8601String()});
     try{
       var response = await dio.post(
         "$_endpoint/updateUserNotifications",
@@ -419,7 +419,7 @@ var headers = {
           "email": "${user.email}",
           "update": {
             "\$set": {
-              "notif": list??["$message"],
+              "notif": list??[{"message": "$message", "timeStamp": DateTime.now().toIso8601String()}],
             }
           }
         }),

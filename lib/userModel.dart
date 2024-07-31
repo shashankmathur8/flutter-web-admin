@@ -48,6 +48,24 @@ class User {
     this.isLevel3Enabled
   });
 
+  toJsonNotification(List? notif){
+    List temp=[];
+    for(var x in notif!){
+      temp.add((x as notification).toJson());
+    }
+    return temp;
+
+  }
+
+  fromJsonNotification(List? notif){
+    List temp=[];
+    for(var x in notif!){
+      temp.add((x as notification).toJson());
+    }
+    return temp;
+
+  }
+
   Map<dynamic, dynamic> toJson() {
     return {
       "id": id,
@@ -67,7 +85,7 @@ class User {
       "isEnabled": isEnabled,
       "profile": profile,
       "isAdmin": isAdmin,
-      "notif":notif,
+      "notif":toJsonNotification(notif),
       "level3Access":level3Access,
       "isLevel1Enabled":isLevel1Enabled,
       "isLevel2Enabled":isLevel2Enabled,
@@ -99,5 +117,23 @@ class User {
         isLevel1Enabled:json["isLevel1Enabled"]??false,
         isLevel2Enabled:json["isLevel2Enabled"]??false,
         isLevel3Enabled:json["isLevel3Enabled"]??false,);
+  }
+}
+class notification{
+  String? message;
+  DateTime? timeStamp;
+  notification({required this.message,required this.timeStamp});
+
+  factory notification.fromJson(Map<dynamic, dynamic> json) {
+    return notification(
+      message: json['message'],
+      timeStamp: json['timeStamp'],
+    );
+  }
+  Map<dynamic, dynamic> toJson() {
+    return {
+      "message": message,
+      "timeStamp": timeStamp,
+    };
   }
 }

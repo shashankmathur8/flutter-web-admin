@@ -7,7 +7,7 @@ import 'companyModel.dart';
 
 class CompanyService {
   final dio = Dio();
-  final String _endpoint = "https://crmproxyserver.azurewebsites.net";
+  final String _endpoint = "https://hrhcserver.azurewebsites.net";
   var headers = {
     "content-type": "application/json",
   };
