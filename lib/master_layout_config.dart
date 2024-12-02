@@ -11,27 +11,20 @@ final sidebarMenuConfigs = [
     title: (context) => Lang.of(context).dashboard,
   ),
   SidebarMenuConfig(
-    uri: '',
-    icon: Icons.library_books_rounded,
-    title: (context) => Lang.of(context).pages(2),
-    children: [
-      SidebarChildMenuConfig(
-        uri: RouteUri.error404,
-        icon: Icons.circle_outlined,
-        title: (context) => "Reports",
-      ),
-      SidebarChildMenuConfig(
-        uri: RouteUri.register,
-        icon: Icons.circle_outlined,
-        title: (context) => Lang.of(context).register,
-      ),
-      SidebarChildMenuConfig(
-        uri: RouteUri.registerCompany,
-        icon: Icons.circle_outlined,
-        title: (context) => "Register Company",
-      ),
-    ],
+    uri: RouteUri.error404,
+    icon: Icons.bug_report_sharp,
+    title: (context) => "Reports",
   ),
+  SidebarMenuConfig(
+    uri: RouteUri.register,
+    icon: Icons.app_registration,
+    title: (context) => Lang.of(context).register,
+  ),
+  SidebarMenuConfig(
+    uri: RouteUri.registerCompany,
+    icon: Icons.corporate_fare,
+    title: (context) => "Register Company",
+  )
 ];
 
 const localeMenuConfigs = [

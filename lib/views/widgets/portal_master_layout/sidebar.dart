@@ -328,7 +328,6 @@ class SidebarHeader extends StatelessWidget {
               builder: (context, value, child) {
                 return CircleAvatar(
                   backgroundColor: Colors.white,
-                  backgroundImage: NetworkImage(value),
                   radius: 20.0,
                 );
               },

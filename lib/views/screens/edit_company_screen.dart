@@ -20,19 +20,35 @@ import 'package:web_admin/views/widgets/public_master_layout/public_master_layou
 
 import '../../companyModel.dart';
 
-class RegisterCompanyScreen extends StatefulWidget {
-  const RegisterCompanyScreen({super.key});
+class EditCompanyScreen extends StatefulWidget {
+  String email;
+  String phoneNo;
+  String faxNo;
+  String companyName;
+  List tags1;
+  List tags2;
+  List tags3;
+  String companyId;
+
+  EditCompanyScreen(
+      {super.key,
+      required this.email,
+      required this.phoneNo,
+      required this.faxNo,
+      required this.companyName,
+      required this.tags1,
+      required this.tags2,
+      required this.tags3,required this.companyId});
 
   @override
-  State<RegisterCompanyScreen> createState() => _RegisterCompanyScreenState();
+  State<EditCompanyScreen> createState() => _EditCompanyScreenState();
 }
 
-class _RegisterCompanyScreenState extends State<RegisterCompanyScreen> {
+class _EditCompanyScreenState extends State<EditCompanyScreen> {
   final _passwordTextEditingController = TextEditingController();
   final emailController = TextEditingController();
   final phoneNoController = TextEditingController();
   final faxNoController = TextEditingController();
-
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormBuilderState>();
@@ -40,11 +56,11 @@ class _RegisterCompanyScreenState extends State<RegisterCompanyScreen> {
   late StringTagController _stringTagController = StringTagController();
   late StringTagController _stringTagController2 = StringTagController();
   late StringTagController _stringTagController3 = StringTagController();
-  static const List<String> _initialTags = <String>[
+  List<String> initialTags = <String>[
   ];
-  static const List<String> _initialTags2 = <String>[
+  List<String> initialTags2 = <String>[
   ];
-  static const List<String> _initialTags3 = <String>[
+  List<String> initialTags3 = <String>[
   ];
 
   var _isFormLoading = false;
@@ -116,6 +132,26 @@ class _RegisterCompanyScreenState extends State<RegisterCompanyScreen> {
   Widget build(BuildContext context) {
     final lang = Lang.of(context);
     final themeData = Theme.of(context);
+
+    usernameController.text=widget.companyName;
+    emailController.text=widget.email;
+    phoneNoController.text=widget.phoneNo;
+    faxNoController.text=widget.faxNo;
+    List<String>xyz=[];
+    for(var d in widget.tags1){
+      xyz.add(d);
+    }
+    List<String>xyz2=[];
+    for(var d in widget.tags2){
+      xyz2.add(d);
+    }
+    List<String>xyz3=[];
+    for(var d in widget.tags3){
+      xyz3.add(d);
+    }
+    initialTags=xyz;
+    initialTags2=xyz2;
+    initialTags3=xyz3;
 
     return PublicMasterLayout(
       body: SingleChildScrollView(
@@ -228,7 +264,7 @@ class _RegisterCompanyScreenState extends State<RegisterCompanyScreen> {
                             child: Column(children: [
                               TextFieldTags<String>(
                                 textfieldTagsController: _stringTagController,
-                                initialTags: _initialTags,
+                                initialTags: initialTags,
                                 textSeparators: const [' ', ','],
                                 letterCase: LetterCase.normal,
                                 validator: (String tag) {
@@ -362,7 +398,7 @@ class _RegisterCompanyScreenState extends State<RegisterCompanyScreen> {
                             child: Column(children: [
                               TextFieldTags<String>(
                                 textfieldTagsController: _stringTagController2,
-                                initialTags: _initialTags2,
+                                initialTags: initialTags2,
                                 textSeparators: const [' ', ','],
                                 letterCase: LetterCase.normal,
                                 validator: (String tag) {
@@ -496,7 +532,7 @@ class _RegisterCompanyScreenState extends State<RegisterCompanyScreen> {
                             child: Column(children: [
                               TextFieldTags<String>(
                                 textfieldTagsController: _stringTagController3,
-                                initialTags: _initialTags3,
+                                initialTags: initialTags3,
                                 textSeparators: const [' ', ','],
                                 letterCase: LetterCase.normal,
                                 validator: (String tag) {
@@ -637,10 +673,10 @@ class _RegisterCompanyScreenState extends State<RegisterCompanyScreen> {
                                 onPressed: (_isFormLoading
                                     ? null
                                     : () => {
-                                          CompanyService().createCompany(
+                                          CompanyService().updateCompany(
                                               Company(topPerformers: [],name: usernameController.text,
                                                 email: emailController.text,
-                                                companyID: "C${DateTime.now().millisecondsSinceEpoch}",
+                                                companyID: widget.companyId,
                                                 level1Status:_stringTagController.getTags,
                                                 level2Status: _stringTagController2.getTags,
                                                 level3Status: _stringTagController3.getTags,
@@ -657,7 +693,7 @@ class _RegisterCompanyScreenState extends State<RegisterCompanyScreen> {
                                             }
                                           })
                                         }),
-                                child: Text(lang.register),
+                                child: Text("Update"),
                               ),
                             ),
                           ),

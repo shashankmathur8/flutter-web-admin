@@ -73,7 +73,7 @@ class Lang {
   /// `Web Admin`
   String get appTitle {
     return Intl.message(
-      'Web Admin',
+      'HRHC Admin',
       name: 'appTitle',
       desc: '',
       args: [],

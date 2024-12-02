@@ -32,7 +32,7 @@ class AppThemeData {
         foregroundColor: Colors.white,
       ),
       scaffoldBackgroundColor: kScreenBackgroundColor,
-      drawerTheme: const DrawerThemeData(backgroundColor: Color(0xFF343A40)),
+      drawerTheme: const DrawerThemeData(backgroundColor: Color(0XFF12465C)),
       colorScheme: const ColorScheme(
         brightness: Brightness.light,
         primary: kPrimaryColor,

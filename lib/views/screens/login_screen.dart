@@ -109,13 +109,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: kDefaultPadding),
                       child: Image.asset(
-                        'assets/images/app_logo.png',
-                        height: 80.0,
+                        'assets/images/logo.png',
+                        height: 120.0,
                       ),
                     ),
                     Text(
-                      lang.appTitle,
+                      "HRHC Admin",
                       style: themeData.textTheme.headlineMedium!.copyWith(
+                        color: Color(0XFF12465C),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -149,31 +150,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-                          SizedBox(
-                            height: 40.0,
-                            width: double.infinity,
-                            child: TextButton(
-                              style: themeData.extension<AppButtonTheme>()!.secondaryText,
-                              onPressed: () => GoRouter.of(context).go(RouteUri.register),
-                              child: RichText(
-                                text: TextSpan(
-                                  text: '${lang.dontHaveAnAccount} ',
-                                  style: TextStyle(
-                                    color: themeData.colorScheme.onSurface,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text: lang.registerNow,
-                                      style: TextStyle(
-                                        color: themeData.extension<AppColorScheme>()!.hyperlink,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -196,8 +172,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final Config config = Config(
     customTokenUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
     customAuthorizationUrl:"https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-    tenant: '9a475b2d-36f3-4c28-8caf-aba70242cee4',
-    clientId: '0e445bb4-1ad9-4063-8ffe-e760a00428c7',
+    tenant: 'be478cbb-19fa-410d-8438-8c03da171e51',
+    clientId: 'f36db305-e4b2-45a8-8189-37dd952e10c8',
     scope: 'openid profile email Mail.Read Mail.Send User.ReadWrite.All Directory.ReadWrite.All',
     navigatorKey: navigatorKey,
     loader: SizedBox(),
@@ -260,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
       data = await json.decode(response.toString());
       print("data=${data}");
       print("data=${data}");
-      if(data["mail"].toString()=="ShashankMathur@SMAssociates29.onmicrosoft.com" || data["mail"].toString()=="MSingh@SMAssociates29.onmicrosoft.com" ){
+      if(data["mail"].toString()=="Crmhrhc@crmhrhcgmail.onmicrosoft.com" || data["mail"].toString()=="MSingh@crmhrhcgmail.onmicrosoft.com" ){
         return true;
       }else{
         return false;

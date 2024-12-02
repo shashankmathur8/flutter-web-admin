@@ -45,6 +45,24 @@ class CompanyService {
       return false;
     }
   }
+  Future<bool> updateCompany(Company company) async {
+    try {
+      var response = await dio.post("$_endpoint/updateCompany",
+          options: Options(headers: headers),
+          data: jsonEncode(
+            {"companyID": company.companyID, "replacement": company.toJson()},
+          ));
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    }catch(e){
+      print(e);
+      return false;
+    }
+  }
+
 
   Future<bool> deleteCompany(Company company) async {
     var response = await dio.post(

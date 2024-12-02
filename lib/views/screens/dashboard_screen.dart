@@ -4,8 +4,14 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_mongodb_realm/auth/core_realm_user.dart';
+import 'package:flutter_mongodb_realm/auth/credentials/credentials.dart';
+import 'package:flutter_mongodb_realm/database/mongo_collection.dart';
+import 'package:flutter_mongodb_realm/mongo_realm_client.dart';
+import 'package:flutter_mongodb_realm/realm_app.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:go_router/go_router.dart';
 import 'package:textfield_tags/textfield_tags.dart';
 import 'package:web_admin/companyModel.dart';
 import 'package:web_admin/companyService.dart';
@@ -14,10 +20,13 @@ import 'package:web_admin/generated/l10n.dart';
 import 'package:web_admin/theme/theme_extensions/app_button_theme.dart';
 import 'package:web_admin/theme/theme_extensions/app_color_scheme.dart';
 import 'package:web_admin/theme/theme_extensions/app_data_table_theme.dart';
+import 'package:web_admin/utils/appColors.dart';
 import 'package:web_admin/utils/styles.dart';
 import 'package:web_admin/views/widgets/card_elements.dart';
 import 'package:web_admin/views/widgets/portal_master_layout/portal_master_layout.dart';
 
+import '../../app_router.dart';
+import '../../fileConvert.dart';
 import '../../localStorage.dart';
 import '../../root_app.dart';
 import '../../userModel.dart';
@@ -42,8 +51,13 @@ class DashboardScreenState extends State<DashboardScreen> {
   final _dataTableHorizontalScrollController = ScrollController();
   final _dataTableHorizontalScrollController2 = ScrollController();
   final textEditingController = TextEditingController();
+  final fileTextEditingController = TextEditingController();
+  var obxRefresh=false.obs;
   late StringTagController _stringTagController4 ;
   List<DropdownMenuItem<String>> dropdownList=[];
+  late final MongoCollection collectionBanner;
+  var bannerSelectionBool=false.obs;
+
 
   @override
   void initState() {
@@ -51,6 +65,7 @@ class DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     getUsers();
     getCompanies();
+    initMongo();
     dropdownList=[DropdownMenuItem(
       value: "1",
       child: Text("1"),
@@ -73,6 +88,15 @@ class DashboardScreenState extends State<DashboardScreen> {
       value: "7",
       child: Text("7"),
     ),];
+  }
+  initMongo()async{
+    await RealmApp.init("application-0-lsgpy");
+    final RealmApp app = RealmApp();
+    CoreRealmUser? userMongo=await app.login(Credentials.emailPassword("mathurshashank8@gmail.com", "Demi@Love78"));
+    MongoRealmClient client = MongoRealmClient();
+    collectionBanner = client.getDatabase("crm").getCollection("banner");
+    print("");
+
   }
 
   getCompanies(){
@@ -154,7 +178,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                         title: lang.newUsers(2),
                         value: '${widget.userLength.value}',
                         icon: Icons.group_add_rounded,
-                        backgroundColor: appColorScheme.warning,
+                        backgroundColor: Color(0xFF006C7D),
                         textColor: appColorScheme.buttonTextBlack,
                         iconColor: Colors.black12,
                         width: summaryCardWidth,
@@ -164,7 +188,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                       title: "Companies",
                       value: '${widget.companiesLength.value}',
                       icon: Icons.group_add_rounded,
-                      backgroundColor: appColorScheme.warning,
+                      backgroundColor: Color(0xFF006C7D),
                       textColor: appColorScheme.buttonTextBlack,
                       iconColor: Colors.black12,
                       width: summaryCardWidth,
@@ -181,66 +205,111 @@ class DashboardScreenState extends State<DashboardScreen> {
               clipBehavior: Clip.antiAlias,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CardHeader(
-                    title: lang.recentOrders(2),
-                    showDivider: false,
-                  ),Container(
+                children: [Container(
+                    color: Color(0xFF00948C).withOpacity(0.05),
                     child: Row(
                       children: [
-                        SizedBox(width: 200,
-                          child: TextFormField(
-                            controller: textEditingControlllerUsersSearch,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "Users",
+                            style: TextStyle(color: AppColors.colorPrimary, fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                         ),
-                        DropdownButton(items: items, value: dropDownValueUsersFilter,onChanged: (value){
-                          setState(() {
-                            dropDownValueUsersFilter = value!;
-                          });
-
-                        }),
-                        GestureDetector(
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.red,
-                            child: Center(child:Text("Search")),
+                        Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Container(width: 200,
+                            height: 40,
+                            decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Colors.grey)
+                            ),
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                fillColor: Colors.grey,
+                              ),
+                              controller: textEditingControlllerUsersSearch,
+                            ),
                           ),
-                          onTap: (){
-                            if(dropDownValueUsersFilter=="username"){
-                              swapList=widget.users;
-                              widget.users = widget.users.where((element) => element.username!.contains(textEditingControlllerUsersSearch.text)).toList();
-                              widget.userLength.value = widget.users.length;
-
-                            }else if(dropDownValueUsersFilter=="email"){
-                              swapList=widget.users;
-                              widget.users = widget.users.where((element) => element.email!.contains(textEditingControlllerUsersSearch.text) ).toList();
-                              widget.userLength.value = widget.users.length;
-
-                            }else if(dropDownValueUsersFilter=="companyID"){
-                              swapList=widget.users;
-                              widget.users = widget.users.where((element) => element.companyID!.contains(textEditingControlllerUsersSearch.text) ).toList();
-                              widget.userLength.value = widget.users.length;
-
-                            }
-
-                          },
                         ),
-                        GestureDetector(
+                        SizedBox(width: 10,),
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
                           child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.red,
-                            child: Center(child:Text("Clear")),
+                            height: 40,
+                            child: DropdownButton(items: items, value: dropDownValueUsersFilter,onChanged: (value){
+                              setState(() {
+                                dropDownValueUsersFilter = value!;
+                              });
+
+                            }),
                           ),
-                          onTap: (){
-                            textEditingControlllerUsersSearch.text = "";
-                            widget.users = swapList;
-                            widget.userLength.value=swapList.length;
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: GestureDetector(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(20)
+                              ),
+                              width: 50,
+                              height: 40,
+                              child: Center(child:Text("Search",style: TextStyle(
+                                color: Colors.white
+                              ),)),
+                            ),
+                            onTap: (){
+                              if(dropDownValueUsersFilter=="username"){
+                                swapList=widget.users;
+                                widget.users = widget.users.where((element) => element.username!.contains(textEditingControlllerUsersSearch.text)).toList();
+                                widget.userLength.value = widget.users.length;
+
+                              }else if(dropDownValueUsersFilter=="email"){
+                                swapList=widget.users;
+                                widget.users = widget.users.where((element) => element.email!.contains(textEditingControlllerUsersSearch.text) ).toList();
+                                widget.userLength.value = widget.users.length;
+
+                              }else if(dropDownValueUsersFilter=="companyID"){
+                                swapList=widget.users;
+                                widget.users = widget.users.where((element) => element.companyID!.contains(textEditingControlllerUsersSearch.text) ).toList();
+                                widget.userLength.value = widget.users.length;
+
+                              }
+
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: GestureDetector(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(20)
+                              ),
+                              width: 50,
+                              height: 40,
+                              child: Center(child:Text("Clear",style: TextStyle(
+                                  color: Colors.white
+                              ))),
+                            ),
+                            onTap: (){
+                              textEditingControlllerUsersSearch.text = "";
+                              widget.users = swapList;
+                              widget.userLength.value=swapList.length;
 
 
 
-                          },
+                            },
+                          ),
                         )
 
                       ],
@@ -350,13 +419,13 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                       children: [
                                                         DropdownButton(
                                                           style: AppStyles.t16NPrimaryColor,
-                                                        
+
                                                             // Initial Value
                                                             value: dropdownvalue.value,
-                                                        
+
                                                             // Down Arrow Icon
                                                             icon: const Icon(Icons.keyboard_arrow_down),
-                                                        
+
                                                             // Array list of items
                                                             items: dropdownList,
                                                             // After selecting the desired option,it will
@@ -591,69 +660,110 @@ class DashboardScreenState extends State<DashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CardHeader(
-                    title: "Companies",
-                    showDivider: false,
-                  ),
-                  /*
-                  filterUI(DashboardScreenState,widget,swapList2,items,dropDownValueCompanyFilter,textEditingControlllerCompanySearch,widget.companiesLength,"company"),
-                  */
                   Container(
+                    color: Color(0xFF00948C).withOpacity(0.05),
                     child: Row(
                       children: [
-                        SizedBox(width: 200,
-                          child: TextFormField(
-                            controller: textEditingControlllerCompanySearch,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("Companies",style: TextStyle(color: AppColors.colorPrimary,fontSize: 20,fontWeight: FontWeight.bold),),
+                        ),
+                        Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Container(width: 200,
+                            height: 40,
+                            decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey)
+                            ),
+                            child: TextFormField(
+
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                fillColor: Colors.grey,
+                              ),
+                              controller: textEditingControlllerCompanySearch,
+                            ),
                           ),
                         ),
-                        DropdownButton(items: items, value: dropDownValueCompanyFilter,onChanged: (value){
-                          setState(() {
-                            dropDownValueCompanyFilter = value!;
-                          });
-
-                        }),
-                        GestureDetector(
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
                           child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.red,
-                            child: Center(child:Text("Search")),
+                            height: 40,
+                            child: DropdownButton(items: items, value: dropDownValueCompanyFilter,onChanged: (value){
+                              setState(() {
+                                dropDownValueCompanyFilter = value!;
+                              });
+
+                            }),
                           ),
-                          onTap: (){
-                            if(dropDownValueCompanyFilter=="username"){
-                              swapList2=widget.companies;
-                              widget.companies = widget.companies.where((element) => element.name == textEditingControlllerCompanySearch.text).toList();
-                              widget.companiesLength.value = widget.companies.length;
-
-                            }else if(dropDownValueCompanyFilter=="email"){
-                              swapList2=widget.companies;
-                              widget.companies = widget.companies.where((element) => element.email == textEditingControlllerCompanySearch.text).toList();
-                              widget.companiesLength.value = widget.companies.length;
-
-                            }else if(dropDownValueCompanyFilter=="companyID"){
-                              swapList2=widget.companies;
-                              widget.companies = widget.companies.where((element) => element.companyID == textEditingControlllerCompanySearch.text).toList();
-                              widget.companiesLength.value = widget.companies.length;
-
-                            }
-
-                          },
                         ),
-                        GestureDetector(
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.red,
-                            child: Center(child:Text("Clear")),
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: GestureDetector(
+                            child: Container(
+
+                              decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(20)
+                              ),
+                              width: 50,
+                              height: 40,
+                              child: Center(child:Text("Search",style: TextStyle(
+                                  color: Colors.white
+                              ))),
+                            ),
+                            onTap: (){
+                              if(dropDownValueCompanyFilter=="username"){
+                                swapList2=widget.companies;
+                                widget.companies = widget.companies.where((element) => element.name == textEditingControlllerCompanySearch.text).toList();
+                                widget.companiesLength.value = widget.companies.length;
+
+                              }else if(dropDownValueCompanyFilter=="email"){
+                                swapList2=widget.companies;
+                                widget.companies = widget.companies.where((element) => element.email == textEditingControlllerCompanySearch.text).toList();
+                                widget.companiesLength.value = widget.companies.length;
+
+                              }else if(dropDownValueCompanyFilter=="companyID"){
+                                swapList2=widget.companies;
+                                widget.companies = widget.companies.where((element) => element.companyID == textEditingControlllerCompanySearch.text).toList();
+                                widget.companiesLength.value = widget.companies.length;
+
+                              }
+
+                            },
                           ),
-                          onTap: (){
-                            textEditingControlllerCompanySearch.text = "";
-                            widget.companies = swapList2;
-                            widget.companiesLength.value=swapList2.length;
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: GestureDetector(
+                            child: Container(
+
+                              decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(20)
+                              ),
+                              width: 50,
+                              height: 40,
+                              child: Center(child:Text("Clear",style: TextStyle(
+                                  color: Colors.white
+                              ))),
+                            ),
+                            onTap: (){
+                              textEditingControlllerCompanySearch.text = "";
+                              widget.companies = swapList2;
+                              widget.companiesLength.value=swapList2.length;
 
 
 
-                          },
+                            },
+                          ),
                         )
 
                       ],
@@ -693,6 +803,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                     DataColumn(label: Text('Actions')),
                                   ],
                                   rows: List.generate(widget.companies.length, (index) {
+                                    var temp;
                                     return DataRow.byIndex(
                                       index: index,
                                       cells: [
@@ -700,24 +811,127 @@ class DashboardScreenState extends State<DashboardScreen> {
                                         DataCell(Text('${widget.companies[index].name}')),
                                         DataCell(Text('${widget.companies[index].email}')),
                                         DataCell(Text('${widget.companies[index].companyID}')),
-                                        DataCell(IconButton(icon: Icon(Icons.delete_forever), onPressed: () {
-                                          Navigator.of(context).push(GenericOverlay(
-                                            iconPath: 'assets/images/editPerm.png',
-                                            title: 'Delete',
-                                            positiveButtonText: 'Delete',
-                                            negativeButtonText: 'Cancel',
-                                            messageWidget: Text("Do You Wish to delete the Company?"),
-                                            onPositivePressCallback: () {
-                                              deleteCompany(widget.companies[index]);
-                                              widget.companies.removeWhere((element) => element.name==widget.companies[index].name);
-                                              widget.companiesLength.value=widget.companies.length;
-                                              Navigator.pop(context);
-                                            },
-                                            onNegativePressCallback: () {
-                                              Navigator.pop(context);
-                                            },
-                                          ));
-                                        },)),
+                                        DataCell(Row(
+                                          children: [
+                                            IconButton(icon: Icon(Icons.delete_forever), onPressed: () {
+                                              Navigator.of(context).push(GenericOverlay(
+                                                iconPath: 'assets/images/editPerm.png',
+                                                title: 'Delete',
+                                                positiveButtonText: 'Delete',
+                                                negativeButtonText: 'Cancel',
+                                                messageWidget: Text("Do You Wish to delete the Company?"),
+                                                onPositivePressCallback: () {
+                                                  deleteCompany(widget.companies[index]);
+                                                  widget.companies.removeWhere((element) => element.name==widget.companies[index].name);
+                                                  widget.companiesLength.value=widget.companies.length;
+                                                  Navigator.pop(context);
+                                                },
+                                                onNegativePressCallback: () {
+                                                  Navigator.pop(context);
+                                                },
+                                              ));
+                                            },),
+                                            IconButton(icon: Icon(Icons.notification_add_outlined), onPressed: () {
+                                              Navigator.of(context).push(GenericOverlay(
+                                                iconPath: 'assets/images/banner.png',
+                                                title: 'Add Banner',
+                                                positiveButtonText: 'Submit',
+                                                negativeButtonText: 'Cancel',
+                                                messageWidget: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Obx(() => Center(
+                                                      child: Row(
+                                                        mainAxisAlignment: MainAxisAlignment.start,
+                                                        children: [
+                                                          Container(
+                                                            child: Row(
+                                                              children: [
+                                                                Checkbox(value: ((bannerSelectionBool.value)), onChanged: (value) {
+                                                                  bannerSelectionBool.value=(value)!;
+                                                                }),
+                                                                Text("Image")
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            width: 10,
+                                                          ),
+                                                          Container(
+                                                            child: Row(
+                                                              children: [
+                                                                Checkbox(value: !(bannerSelectionBool.value), onChanged: (value) {
+                                                                  bannerSelectionBool.value=!(value)!;
+                                                                }),
+                                                                Text("Text")
+                                                              ],
+                                                            ),
+                                                          )
+                                                        ],
+                                                      ),
+                                                    )
+                                                    ),
+                                                    Obx(
+                                                          () => Row(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          SizedBox(
+                                                              width: obxRefresh.value ? 220 : 220,
+                                                              child: TextField(
+                                                                enabled: bannerSelectionBool.value?false:true,
+                                                                controller: fileTextEditingController,
+                                                              )),
+                                                          SizedBox(
+                                                            width: 20,
+                                                          ),
+                                                          SizedBox(
+                                                            width: 60,
+                                                            height: 20,
+                                                            child: Visibility(
+                                                              visible: bannerSelectionBool.value,
+                                                              child: InkWell(
+                                                                onTap: () async {
+                                                                  temp = await FileConvertService().pickFiles();
+                                                                  fileTextEditingController.text="${temp.name}.${temp.extension}";
+                                                                },
+                                                                child: Container(
+                                                                  decoration: BoxDecoration(
+                                                                    color: AppColors.colorPrimary.withOpacity(.5),
+                                                                    border:Border.all(color: AppColors.colorPrimary),
+                                                                    borderRadius:  BorderRadius.circular(20)
+                                                                  ),
+                                                                  width: 60,
+                                                                  height: 20,
+                                                                  child: Center(child:Text("Select")),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          )
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                onPositivePressCallback: () {
+                                                  FileConvertService().uploadFiles(
+                                                      bannerSelectionBool.value?temp.base64.toString():fileTextEditingController.text,
+                                                      collectionBanner,
+                                                      bannerSelectionBool.value,
+                                                      widget.companies[index].companyID.toString());
+                                                  fileTextEditingController.text="";
+                                                  temp=null;
+                                                  Navigator.pop(context);
+                                                },
+                                                onNegativePressCallback: () {
+                                                  Navigator.pop(context);
+                                                },
+                                              ));
+                                            },),
+                                            IconButton(icon: Icon(Icons.edit), onPressed: () {
+                                              GoRouter.of(context).go(RouteUri.editCompany, extra: widget.companies[index]);
+                                            },)
+                                          ],
+                                        )),
 
                                       ],
                                     );

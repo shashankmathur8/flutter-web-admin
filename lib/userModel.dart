@@ -50,7 +50,7 @@ class User {
 
   toJsonNotification(List? notif){
     List temp=[];
-    for(var x in notif!){
+    for(var x in notif??[]){
       temp.add((x as notification).toJson());
     }
     return temp;

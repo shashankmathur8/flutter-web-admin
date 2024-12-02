@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:web_admin/companyModel.dart';
 import 'package:web_admin/providers/user_data_provider.dart';
 import 'package:web_admin/views/screens/buttons_screen.dart';
 import 'package:web_admin/views/screens/colors_screen.dart';
@@ -6,6 +7,7 @@ import 'package:web_admin/views/screens/crud_detail_screen.dart';
 import 'package:web_admin/views/screens/crud_screen.dart';
 import 'package:web_admin/views/screens/dashboard_screen.dart';
 import 'package:web_admin/views/screens/dialogs_screen.dart';
+import 'package:web_admin/views/screens/edit_company_screen.dart';
 import 'package:web_admin/views/screens/error_screen.dart';
 import 'package:web_admin/views/screens/general_ui_screen.dart';
 import 'package:web_admin/views/screens/iframe_demo_screen.dart';
@@ -31,6 +33,7 @@ class RouteUri {
   static const String login = '/login';
   static const String register = '/register';
   static const String registerCompany = '/registerCompany';
+  static const String editCompany = '/editCompany';
   static const String crud = '/crud';
   static const String crudDetail = '/crud-detail';
   static const String iframe = '/iframe';
@@ -139,6 +142,25 @@ GoRouter appRouter(UserDataProvider userDataProvider) {
           return NoTransitionPage<void>(
             key: state.pageKey,
             child: const RegisterCompanyScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: RouteUri.editCompany,
+        pageBuilder: (context, state) {
+          final company = state.extra! as Company;
+          return NoTransitionPage<void>(
+            key: state.pageKey,
+            child: EditCompanyScreen(
+                email: company.email.toString(),
+                phoneNo: company.phone.toString(),
+                faxNo: company.fax.toString(),
+                companyName: company.name.toString(),
+                tags1: company.level1Status ?? [],
+                tags2: company.level2Status ?? [],
+                tags3: company.level3Status ?? [],
+              companyId: company.companyID.toString(),
+            ),
           );
         },
       ),
