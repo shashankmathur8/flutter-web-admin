@@ -8,7 +8,7 @@ import 'package:web_admin/userModel.dart';
 
 class UserService {
   final dio = Dio();
-  final String _endpoint = "https://hrhcserver.azurewebsites.net";
+  final String _endpoint = "https://crmproxyserver.azurewebsites.net";
   //final String _endpoint = "http://localhost:3000/";
   var headers = {
     "content-type": "application/json",

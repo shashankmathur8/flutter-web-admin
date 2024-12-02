@@ -32,7 +32,7 @@ class FileConvertService {
   final dio = Dio();
 
   //final String _endpoint = "localhost:3000";
-  final String _endpoint = "https://hrhcproxyserver-hwaqdqbchactcdbt.centralindia-01.azurewebsites.net";
+  final String _endpoint = "https://crmproxyserver.azurewebsites.net";
   var headers = {
     "content-type": "application/json",
   };
